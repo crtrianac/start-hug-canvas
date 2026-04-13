@@ -259,7 +259,6 @@ export const carbonDatabaseEntries: CarbonDatabaseEntry[] = [
   },
 ];
 
-    pcfValue: 2.1,
     pcfUnit: "kg CO₂e / kg product",
     certificationBody: "DNV",
     certificationScheme: "ISCC EU",
