@@ -3,6 +3,14 @@ export type MovementType = "Issued" | "Booked" | "Claimed";
 export type ReportingGood = "Industrials" | "Energy" | "Fertilizers";
 export type ClaimType = "Proportional" | "Allocated";
 
+export interface TimelineEvent {
+  label: string;
+  movementId: string;
+  type: string;
+  date: string;
+  description: string;
+}
+
 export interface Movement {
   id: string;
   materialName: string;
@@ -22,6 +30,7 @@ export interface Movement {
   emissionAllocationFactor?: number;
   massBalanceFactor?: number;
   onBehalfOf?: string;
+  timeline: TimelineEvent[];
 }
 
 export interface CarbonDatabaseEntry {
