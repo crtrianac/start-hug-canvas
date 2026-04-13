@@ -3,6 +3,14 @@ export type MovementType = "Issued" | "Booked" | "Claimed";
 export type ReportingGood = "Industrials" | "Energy" | "Fertilizers";
 export type ClaimType = "Proportional" | "Allocated";
 
+export interface TimelineEvent {
+  label: string;
+  movementId: string;
+  type: string;
+  date: string;
+  description: string;
+}
+
 export interface Movement {
   id: string;
   materialName: string;
@@ -22,6 +30,7 @@ export interface Movement {
   emissionAllocationFactor?: number;
   massBalanceFactor?: number;
   onBehalfOf?: string;
+  timeline: TimelineEvent[];
 }
 
 export interface CarbonDatabaseEntry {
@@ -50,6 +59,9 @@ export const initialMovements: Movement[] = [
     complianceScheme: "ISCC EU",
     totalTons: 1200,
     totalEmissions: 840,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-001", type: "GoodsMovement", date: "12/01/2024 09:30 AM", description: "Brunsbüttel" },
+    ],
   },
   {
     id: "2",
@@ -64,6 +76,10 @@ export const initialMovements: Movement[] = [
     complianceScheme: "ISCC EU",
     totalTons: 800,
     totalEmissions: 560,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-002", type: "GoodsMovement", date: "12/01/2024 09:30 AM", description: "Brunsbüttel" },
+      { label: "Certificate transferred", movementId: "MOV-2024-002", type: "GoodsMovement", date: "12/05/2024 02:15 PM", description: "Brunsbüttel to PepsiCo Europe" },
+    ],
   },
   {
     id: "3",
@@ -80,6 +96,11 @@ export const initialMovements: Movement[] = [
     claimedPercentage: 100,
     totalTons: 500,
     totalEmissions: 350,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-003", type: "GoodsMovement", date: "11/30/2024 01:00 AM", description: "Brunsbüttel" },
+      { label: "Certificate transferred", movementId: "MOV-2024-003", type: "GoodsMovement", date: "12/05/2024 10:00 AM", description: "Brunsbüttel to PepsiCo Europe" },
+      { label: "Certificate retired (claimed)", movementId: "MOV-2024-003", type: "GoodsMovement", date: "12/10/2024 11:00 AM", description: "PepsiCo Europe — Fertilizers" },
+    ],
   },
   {
     id: "4",
@@ -94,6 +115,9 @@ export const initialMovements: Movement[] = [
     complianceScheme: "REDcert EU",
     totalTons: 2000,
     totalEmissions: 1400,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-004", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Hull" },
+    ],
   },
   {
     id: "5",
@@ -108,6 +132,10 @@ export const initialMovements: Movement[] = [
     complianceScheme: "REDcert EU",
     totalTons: 1500,
     totalEmissions: 1050,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-005", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Hull" },
+      { label: "Certificate transferred", movementId: "MOV-2024-005", type: "GoodsMovement", date: "11/28/2024 04:30 PM", description: "Hull to Nestlé UK" },
+    ],
   },
   {
     id: "6",
@@ -124,6 +152,11 @@ export const initialMovements: Movement[] = [
     claimedPercentage: 75,
     totalTons: 600,
     totalEmissions: 420,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-006", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Hull" },
+      { label: "Certificate transferred", movementId: "MOV-2024-006", type: "GoodsMovement", date: "11/28/2024 04:30 PM", description: "Hull to Nestlé UK" },
+      { label: "Certificate retired (claimed)", movementId: "MOV-2024-006", type: "GoodsMovement", date: "12/02/2024 01:20 PM", description: "Nestlé UK — Energy" },
+    ],
   },
   {
     id: "7",
@@ -138,6 +171,9 @@ export const initialMovements: Movement[] = [
     complianceScheme: "ISCC EU",
     totalTons: 950,
     totalEmissions: 665,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-007", type: "GoodsMovement", date: "12/15/2024 10:00 AM", description: "Brunsbüttel" },
+    ],
   },
   {
     id: "8",
@@ -154,6 +190,11 @@ export const initialMovements: Movement[] = [
     claimedPercentage: 50,
     totalTons: 400,
     totalEmissions: 280,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-008", type: "GoodsMovement", date: "11/10/2024 09:00 AM", description: "Hull" },
+      { label: "Certificate transferred", movementId: "MOV-2024-008", type: "GoodsMovement", date: "11/13/2024 02:00 PM", description: "Hull to BASF SE" },
+      { label: "Certificate retired (claimed)", movementId: "MOV-2024-008", type: "GoodsMovement", date: "11/15/2024 09:10 AM", description: "BASF SE — Industrials" },
+    ],
   },
   {
     id: "9",
@@ -168,6 +209,10 @@ export const initialMovements: Movement[] = [
     complianceScheme: "ISCC EU",
     totalTons: 350,
     totalEmissions: 245,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-009", type: "GoodsMovement", date: "12/15/2024 10:00 AM", description: "Brunsbüttel" },
+      { label: "Certificate transferred", movementId: "MOV-2024-009", type: "GoodsMovement", date: "12/18/2024 03:45 PM", description: "Brunsbüttel to Cargill Germany" },
+    ],
   },
   {
     id: "10",
@@ -182,6 +227,10 @@ export const initialMovements: Movement[] = [
     complianceScheme: "REDcert EU",
     totalTons: 720,
     totalEmissions: 504,
+    timeline: [
+      { label: "Certificate issued", movementId: "MOV-2024-010", type: "GoodsMovement", date: "12/15/2024 08:00 AM", description: "Hull" },
+      { label: "Certificate transferred", movementId: "MOV-2024-010", type: "GoodsMovement", date: "12/20/2024 11:30 AM", description: "Hull to ABF Ingredients" },
+    ],
   },
 ];
 
@@ -209,3 +258,5 @@ export const carbonDatabaseEntries: CarbonDatabaseEntry[] = [
     region: "United Kingdom",
   },
 ];
+
+

@@ -20,12 +20,42 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+const dotColor: Record<string, string> = {
+  "Certificate issued": "border-muted-foreground",
+  "Certificate transferred": "border-yellow-500",
+  "Certificate retired (claimed)": "border-green-500",
+};
+
+function Timeline({ events }: { events: Movement["timeline"] }) {
+  return (
+    <div className="relative pl-5 space-y-6 mt-4">
+      {/* vertical line */}
+      <div className="absolute left-[9px] top-2 bottom-2 w-px bg-border" />
+      {events.map((evt, i) => (
+        <div key={i} className="relative">
+          {/* dot */}
+          <div
+            className={`absolute -left-5 top-1 h-[18px] w-[18px] rounded-full border-2 bg-background ${dotColor[evt.label] ?? "border-muted-foreground"}`}
+          />
+          <div>
+            <p className="text-sm font-semibold text-foreground">{evt.label}</p>
+            <p className="text-xs text-muted-foreground">Movement Id: {evt.movementId}</p>
+            <p className="text-xs text-muted-foreground">{evt.type}</p>
+            <p className="text-xs text-muted-foreground">{evt.date}</p>
+            <p className="text-xs text-muted-foreground">{evt.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function MovementDetailDialog({ movement, open, onOpenChange }: Props) {
   if (!movement) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-base">Movement Details</DialogTitle>
           <DialogDescription className="text-xs">{movement.movementId}</DialogDescription>
@@ -53,6 +83,9 @@ export function MovementDetailDialog({ movement, open, onOpenChange }: Props) {
             <Row label="Claim Type" value={movement.claimType} />
           )}
         </div>
+        <Separator />
+        <p className="text-sm font-semibold text-foreground">Certificate Timeline</p>
+        <Timeline events={movement.timeline} />
       </DialogContent>
     </Dialog>
   );
