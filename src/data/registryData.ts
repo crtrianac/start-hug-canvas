@@ -259,10 +259,6 @@ export const carbonDatabaseEntries: CarbonDatabaseEntry[] = [
   },
 ];
 
-export const carbonDatabaseEntries: CarbonDatabaseEntry[] = [
-  {
-    id: "1",
-    product: "YaraBela Nitromag 27-0-0 (FR)",
     pcfValue: 2.1,
     pcfUnit: "kg CO₂e / kg product",
     certificationBody: "DNV",
