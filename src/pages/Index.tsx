@@ -113,10 +113,6 @@ export default function Index() {
   return (
     <AppLayout>
       <Tabs defaultValue="registry" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="registry">Finish Products Registry</TabsTrigger>
-          <TabsTrigger value="carbon">Carbon Database (environmental attributes)</TabsTrigger>
-        </TabsList>
 
         <TabsContent value="registry" className="space-y-0">
           <AIChatPlaceholder />
