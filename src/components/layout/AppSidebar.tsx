@@ -13,9 +13,7 @@ import { Button } from "@/components/ui/button";
 
 const navItems = [
   { title: "Registry", icon: ClipboardList, active: true },
-  { title: "Transfers", icon: ArrowLeftRight, active: false },
   { title: "Carbon Database", icon: Database, active: false },
-  { title: "Claims", icon: Award, active: false },
 ];
 
 export function AppSidebar() {
