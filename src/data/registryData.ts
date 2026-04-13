@@ -259,22 +259,4 @@ export const carbonDatabaseEntries: CarbonDatabaseEntry[] = [
   },
 ];
 
-    pcfUnit: "kg CO₂e / kg product",
-    certificationBody: "DNV",
-    certificationScheme: "ISCC EU",
-    validFrom: "2024-01-01",
-    validTo: "2024-12-31",
-    region: "France",
-  },
-  {
-    id: "2",
-    product: "YaraBela Axan 27-0-0 (UK)",
-    pcfValue: 2.3,
-    pcfUnit: "kg CO₂e / kg product",
-    certificationBody: "DNV",
-    certificationScheme: "REDcert EU",
-    validFrom: "2024-01-01",
-    validTo: "2024-12-31",
-    region: "United Kingdom",
-  },
-];
+
