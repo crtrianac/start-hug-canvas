@@ -5,10 +5,8 @@ import { X } from "lucide-react";
 interface FilterBarProps {
   filters: {
     product: string;
-    producer: string;
     plant: string;
     movementType: string;
-    scheme: string;
     timeframe: string;
   };
   onFilterChange: (key: string, value: string) => void;
@@ -28,16 +26,6 @@ export function FilterBar({ filters, onFilterChange, onClearAll }: FilterBarProp
           <SelectItem value="all">All products</SelectItem>
           <SelectItem value="nitromag">YaraBela Nitromag (FR)</SelectItem>
           <SelectItem value="axan">YaraBela Axan (UK)</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Select value={filters.producer} onValueChange={(v) => onFilterChange("producer", v)}>
-        <SelectTrigger className="w-[140px] h-9 text-xs">
-          <SelectValue placeholder="Producer" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All producers</SelectItem>
-          <SelectItem value="yara">Yara International</SelectItem>
         </SelectContent>
       </Select>
 
@@ -64,16 +52,6 @@ export function FilterBar({ filters, onFilterChange, onClearAll }: FilterBarProp
         </SelectContent>
       </Select>
 
-      <Select value={filters.scheme} onValueChange={(v) => onFilterChange("scheme", v)}>
-        <SelectTrigger className="w-[160px] h-9 text-xs">
-          <SelectValue placeholder="Compliance scheme" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All schemes</SelectItem>
-          <SelectItem value="ISCC EU">ISCC EU</SelectItem>
-          <SelectItem value="REDcert EU">REDcert EU</SelectItem>
-        </SelectContent>
-      </Select>
 
       <Select value={filters.timeframe} onValueChange={(v) => onFilterChange("timeframe", v)}>
         <SelectTrigger className="w-[140px] h-9 text-xs">
