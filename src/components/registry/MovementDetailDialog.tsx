@@ -69,7 +69,7 @@ export function MovementDetailDialog({ movement, open, onOpenChange }: Props) {
           <Row label="Tons" value={`${movement.tons.toLocaleString()} t`} />
           <Row label="Timestamp" value={movement.timestamp} />
           <Row label="Plant / Customer" value={movement.plantOrCustomer} />
-          <Row label="Compliance Scheme" value={movement.complianceScheme} />
+          <Row label="Ammonia type" value={movement.complianceScheme} />
           {movement.reportingGood && (
             <Row label="Reporting Good" value={movement.reportingGood} />
           )}
