@@ -12,10 +12,8 @@ import { toast } from "@/hooks/use-toast";
 
 const defaultFilters = {
   product: "all",
-  producer: "all",
   plant: "all",
   movementType: "all",
-  scheme: "all",
   timeframe: "all",
 };
 
@@ -37,7 +35,6 @@ export default function Index() {
       if (filters.product === "axan" && !m.materialName.includes("Axan")) return false;
     }
     if (filters.movementType !== "all" && m.movementType !== filters.movementType) return false;
-    if (filters.scheme !== "all" && m.complianceScheme !== filters.scheme) return false;
     if (filters.plant !== "all") {
       if (filters.plant === "brunsbuttel" && m.plantOrCustomer !== "Brunsbüttel") return false;
       if (filters.plant === "hull" && m.plantOrCustomer !== "Hull") return false;
