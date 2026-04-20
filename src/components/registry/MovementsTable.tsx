@@ -1,4 +1,4 @@
-import { ArrowUpCircle, BookOpen, Award, FileDown, Eye } from "lucide-react";
+import { Award, FileDown, Eye } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,11 +89,10 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
             <TableRow className="bg-muted/50">
               <TableHead className="text-xs font-semibold">Material Name</TableHead>
               <TableHead className="text-xs font-semibold">Status</TableHead>
-              <TableHead className="text-xs font-semibold">Movement Type</TableHead>
               <TableHead className="text-xs font-semibold">Conv. Rate</TableHead>
               <TableHead className="text-xs font-semibold text-right">Tons</TableHead>
               <TableHead className="text-xs font-semibold">Movement ID</TableHead>
-              <TableHead className="text-xs font-semibold">Timestamp</TableHead>
+              <TableHead className="text-xs font-semibold">Date</TableHead>
               <TableHead className="text-xs font-semibold">Plant / Customer</TableHead>
               <TableHead className="text-xs font-semibold">Reporting Good</TableHead>
               <TableHead className="text-xs font-semibold text-right">Actions</TableHead>
@@ -109,11 +108,10 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
                     {m.parentMovementId && <PartialBadge />}
                   </div>
                 </TableCell>
-                <TableCell><MovementTypeIcon type={m.movementType} /></TableCell>
                 <TableCell className="text-sm">{m.conversionRate}%</TableCell>
                 <TableCell className="text-sm text-right font-medium">{m.tons.toLocaleString()}</TableCell>
                 <TableCell className="text-sm text-muted-foreground font-mono">{m.movementId}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{m.timestamp}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">{m.timestamp.split(",")[0]}</TableCell>
                 <TableCell className="text-sm">{m.plantOrCustomer}</TableCell>
                 <TableCell className="text-sm">{m.reportingGood || "—"}</TableCell>
                 <TableCell className="text-right">
