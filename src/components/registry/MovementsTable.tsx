@@ -24,6 +24,17 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+function PartialBadge() {
+  return (
+    <Badge
+      variant="outline"
+      className="text-[10px] font-medium bg-[hsl(270,70%,55%)]/10 text-[hsl(270,70%,45%)] border-[hsl(270,70%,55%)]/20"
+    >
+      Partially co-claimed
+    </Badge>
+  );
+}
+
 function MovementTypeIcon({ type }: { type: string }) {
   const icons: Record<string, React.ReactNode> = {
     Issued: <ArrowUpCircle className="h-4 w-4 text-primary" />,
