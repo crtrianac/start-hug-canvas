@@ -9,6 +9,8 @@ export interface TimelineEvent {
   type: string;
   date: string;
   description: string;
+  actor?: string;
+  documentUrl?: string;
 }
 
 export interface Movement {
@@ -22,6 +24,7 @@ export interface Movement {
   timestamp: string;
   plantOrCustomer: string;
   complianceScheme: string;
+  originPlant?: string;
   reportingGood?: ReportingGood;
   totalTons?: number;
   totalEmissions?: number;
@@ -30,6 +33,7 @@ export interface Movement {
   emissionAllocationFactor?: number;
   massBalanceFactor?: number;
   onBehalfOf?: string;
+  parentMovementId?: string;
   timeline: TimelineEvent[];
 }
 
