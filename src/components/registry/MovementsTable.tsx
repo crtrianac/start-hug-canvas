@@ -24,6 +24,17 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+function PartialBadge() {
+  return (
+    <Badge
+      variant="outline"
+      className="text-[10px] font-medium bg-[hsl(270,70%,55%)]/10 text-[hsl(270,70%,45%)] border-[hsl(270,70%,55%)]/20"
+    >
+      Partially co-claimed
+    </Badge>
+  );
+}
+
 function MovementTypeIcon({ type }: { type: string }) {
   const icons: Record<string, React.ReactNode> = {
     Issued: <ArrowUpCircle className="h-4 w-4 text-primary" />,
@@ -92,7 +103,12 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
             {movements.map((m) => (
               <TableRow key={m.id} className="hover:bg-muted/30">
                 <TableCell className="text-sm font-medium max-w-[200px] truncate">{m.materialName}</TableCell>
-                <TableCell><StatusBadge status={m.status} /></TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-1 items-start">
+                    <StatusBadge status={m.status} />
+                    {m.parentMovementId && <PartialBadge />}
+                  </div>
+                </TableCell>
                 <TableCell><MovementTypeIcon type={m.movementType} /></TableCell>
                 <TableCell className="text-sm">{m.conversionRate}%</TableCell>
                 <TableCell className="text-sm text-right font-medium">{m.tons.toLocaleString()}</TableCell>
