@@ -62,26 +62,95 @@ export default function Index() {
       emissionAllocationFactor?: number,
       massBalanceFactor?: number
     ) => {
-      setMovements((prev) =>
-        prev.map((m) =>
-          m.id === movementId
-            ? {
-                ...m,
-                status: "Claimed" as const,
-                movementType: "Claimed" as const,
-                reportingGood,
-                claimedPercentage: percentage,
-                claimType,
-                onBehalfOf,
-                emissionAllocationFactor,
-                massBalanceFactor,
-              }
-            : m
-        )
-      );
+      setMovements((prev) => {
+        const target = prev.find((m) => m.id === movementId);
+        if (!target) return prev;
+
+        const originalTons = target.tons;
+        const originalEmissions = target.totalEmissions ?? Math.round(originalTons * 0.7);
+        const claimedTons = Math.round((originalTons * percentage) / 100);
+        const claimedEmissions = Math.round(((originalEmissions * percentage) / 100) * 10) / 10;
+        const remainderTons = originalTons - claimedTons;
+        const remainderEmissions = Math.round((originalEmissions - claimedEmissions) * 10) / 10;
+        const nowStr = new Date().toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" });
+
+        const claimedMovement: Movement = {
+          ...target,
+          status: "Claimed",
+          movementType: "Claimed",
+          tons: claimedTons,
+          totalTons: claimedTons,
+          totalEmissions: claimedEmissions,
+          reportingGood,
+          claimedPercentage: percentage,
+          claimType,
+          onBehalfOf,
+          emissionAllocationFactor,
+          massBalanceFactor,
+          timeline: [
+            ...target.timeline,
+            {
+              label: "Certificate retired (claimed)",
+              movementId: target.movementId,
+              type: "GoodsMovement",
+              date: nowStr,
+              description: `Claimed ${percentage}% by ${onBehalfOf ?? target.plantOrCustomer} — ${reportingGood}`,
+              actor: onBehalfOf ? `${target.plantOrCustomer} on behalf of ${onBehalfOf}` : target.plantOrCustomer,
+              documentUrl: `/docs/${target.movementId}-claim.pdf`,
+            },
+          ],
+        };
+
+        if (remainderTons <= 0) {
+          return prev.map((m) => (m.id === movementId ? claimedMovement : m));
+        }
+
+        const splitMatch = target.movementId.match(/-S(\d+)[CR]?$/);
+        const baseId = target.movementId.replace(/-S\d+[CR]?$/, "");
+        const nextSplit = (splitMatch ? parseInt(splitMatch[1], 10) : 0) + 1;
+        const claimedId = `${baseId}-S${nextSplit}C`;
+        const remainderId = `${baseId}-S${nextSplit}R`;
+
+        const claimedSplit: Movement = {
+          ...claimedMovement,
+          id: `${target.id}-c${nextSplit}`,
+          movementId: claimedId,
+          parentMovementId: target.movementId,
+        };
+        const remainderSplit: Movement = {
+          ...target,
+          id: `${target.id}-r${nextSplit}`,
+          movementId: remainderId,
+          status: "Booked",
+          movementType: "Booked",
+          tons: remainderTons,
+          totalTons: remainderTons,
+          totalEmissions: remainderEmissions,
+          parentMovementId: target.movementId,
+          timeline: [
+            ...target.timeline,
+            {
+              label: "Certificate transferred",
+              movementId: remainderId,
+              type: "GoodsMovement",
+              date: nowStr,
+              description: `Remaining ${remainderTons.toLocaleString()} t after partial claim of ${percentage}%`,
+              actor: target.plantOrCustomer,
+            },
+          ],
+        };
+
+        return prev.flatMap((m) =>
+          m.id === movementId ? [claimedSplit, remainderSplit] : [m]
+        );
+      });
+
       toast({
-        title: "Claim initiated",
-        description: `Movement ${movementId} has been claimed as "${reportingGood}".`,
+        title: percentage < 100 ? "Partial claim initiated" : "Claim initiated",
+        description:
+          percentage < 100
+            ? `${percentage}% claimed as "${reportingGood}". Remainder stays Booked and can still be claimed.`
+            : `Movement ${movementId} has been claimed as "${reportingGood}".`,
       });
     },
     []

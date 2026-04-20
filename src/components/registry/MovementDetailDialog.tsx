@@ -43,6 +43,19 @@ function Timeline({ events }: { events: Movement["timeline"] }) {
             <p className="text-xs text-muted-foreground">{evt.type}</p>
             <p className="text-xs text-muted-foreground">{evt.date}</p>
             <p className="text-xs text-muted-foreground">{evt.description}</p>
+            {evt.actor && (
+              <p className="text-xs text-muted-foreground">By: {evt.actor}</p>
+            )}
+            {evt.documentUrl && (
+              <a
+                href={evt.documentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-primary hover:underline inline-block mt-0.5"
+              >
+                View documentation →
+              </a>
+            )}
           </div>
         </div>
       ))}
@@ -52,6 +65,8 @@ function Timeline({ events }: { events: Movement["timeline"] }) {
 
 export function MovementDetailDialog({ movement, open, onOpenChange }: Props) {
   if (!movement) return null;
+
+  const estimatedNH3 = Math.round(movement.tons * (movement.conversionRate / 100) * 10) / 10;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -67,9 +82,11 @@ export function MovementDetailDialog({ movement, open, onOpenChange }: Props) {
           <Row label="Movement Type" value={movement.movementType} />
           <Row label="Conversion Rate" value={`${movement.conversionRate}%`} />
           <Row label="Tons" value={`${movement.tons.toLocaleString()} t`} />
+          <Row label="Estimated NH₃ used" value={`${estimatedNH3.toLocaleString()} t`} />
+          <Row label="Ammonia type" value={movement.complianceScheme} />
+          <Row label="Original plant" value={movement.originPlant ?? "—"} />
           <Row label="Timestamp" value={movement.timestamp} />
           <Row label="Plant / Customer" value={movement.plantOrCustomer} />
-          <Row label="Ammonia type" value={movement.complianceScheme} />
           {movement.reportingGood && (
             <Row label="Reporting Good" value={movement.reportingGood} />
           )}
@@ -81,6 +98,9 @@ export function MovementDetailDialog({ movement, open, onOpenChange }: Props) {
           )}
           {movement.claimType && (
             <Row label="Claim Type" value={movement.claimType} />
+          )}
+          {movement.parentMovementId && (
+            <Row label="Split from" value={movement.parentMovementId} />
           )}
         </div>
         <Separator />
