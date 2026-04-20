@@ -111,11 +111,12 @@ export default function Index() {
         const claimedId = `${baseId}-S${nextSplit}C`;
         const remainderId = `${baseId}-S${nextSplit}R`;
 
+        const parentRef = target.parentMovementId ?? target.movementId;
         const claimedSplit: Movement = {
           ...claimedMovement,
           id: `${target.id}-c${nextSplit}`,
           movementId: claimedId,
-          parentMovementId: target.movementId,
+          parentMovementId: parentRef,
         };
         const remainderSplit: Movement = {
           ...target,
@@ -126,7 +127,7 @@ export default function Index() {
           tons: remainderTons,
           totalTons: remainderTons,
           totalEmissions: remainderEmissions,
-          parentMovementId: target.movementId,
+          parentMovementId: parentRef,
           timeline: [
             ...target.timeline,
             {
