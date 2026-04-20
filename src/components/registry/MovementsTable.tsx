@@ -103,7 +103,12 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
             {movements.map((m) => (
               <TableRow key={m.id} className="hover:bg-muted/30">
                 <TableCell className="text-sm font-medium max-w-[200px] truncate">{m.materialName}</TableCell>
-                <TableCell><StatusBadge status={m.status} /></TableCell>
+                <TableCell>
+                  <div className="flex flex-col gap-1 items-start">
+                    <StatusBadge status={m.status} />
+                    {m.parentMovementId && <PartialBadge />}
+                  </div>
+                </TableCell>
                 <TableCell><MovementTypeIcon type={m.movementType} /></TableCell>
                 <TableCell className="text-sm">{m.conversionRate}%</TableCell>
                 <TableCell className="text-sm text-right font-medium">{m.tons.toLocaleString()}</TableCell>
