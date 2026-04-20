@@ -16,6 +16,7 @@ function StatusBadge({ status }: { status: string }) {
     Issued: "bg-primary/10 text-primary border-primary/20",
     Booked: "bg-[hsl(30,80%,50%)]/10 text-[hsl(30,80%,40%)] border-[hsl(30,80%,50%)]/20",
     Claimed: "bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,35%)] border-[hsl(142,70%,45%)]/20",
+    "Co-claimed": "bg-[hsl(270,70%,55%)]/10 text-[hsl(270,70%,45%)] border-[hsl(270,70%,55%)]/20",
   };
   return (
     <Badge variant="outline" className={`text-xs font-medium ${styles[status] || ""}`}>
