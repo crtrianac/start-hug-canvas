@@ -90,8 +90,8 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
                 <TableCell className="text-sm font-medium max-w-[200px] truncate">{m.materialName}</TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-1 items-start">
-                    <StatusBadge status={m.status} />
-                    {m.parentMovementId && <PartialBadge />}
+                    <StatusBadge status={m.status === "Claimed" && m.parentMovementId ? "Co-claimed" : m.status} />
+                    {m.status === "Booked" && m.parentMovementId && <CoClaimedBadge />}
                   </div>
                 </TableCell>
                 <TableCell className="text-sm">{m.conversionRate}%</TableCell>
