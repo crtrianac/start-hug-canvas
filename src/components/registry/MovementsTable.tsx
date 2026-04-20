@@ -35,20 +35,6 @@ function PartialBadge() {
   );
 }
 
-function MovementTypeIcon({ type }: { type: string }) {
-  const icons: Record<string, React.ReactNode> = {
-    Issued: <ArrowUpCircle className="h-4 w-4 text-primary" />,
-    Booked: <BookOpen className="h-4 w-4 text-[hsl(30,80%,50%)]" />,
-    Claimed: <Award className="h-4 w-4 text-[hsl(142,70%,45%)]" />,
-  };
-  return (
-    <div className="flex items-center gap-1.5">
-      {icons[type]}
-      <span className="text-sm">{type}</span>
-    </div>
-  );
-}
-
 export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV }: MovementsTableProps) {
   const totalTons = movements.reduce((sum, m) => sum + m.tons, 0);
   const issuedTons = movements.filter((m) => m.status === "Issued").reduce((sum, m) => sum + m.tons, 0);
