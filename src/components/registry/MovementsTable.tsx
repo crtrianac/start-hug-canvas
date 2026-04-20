@@ -16,6 +16,7 @@ function StatusBadge({ status }: { status: string }) {
     Issued: "bg-primary/10 text-primary border-primary/20",
     Booked: "bg-[hsl(30,80%,50%)]/10 text-[hsl(30,80%,40%)] border-[hsl(30,80%,50%)]/20",
     Claimed: "bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,35%)] border-[hsl(142,70%,45%)]/20",
+    "Co-claimed": "bg-[hsl(270,70%,55%)]/10 text-[hsl(270,70%,45%)] border-[hsl(270,70%,55%)]/20",
   };
   return (
     <Badge variant="outline" className={`text-xs font-medium ${styles[status] || ""}`}>
@@ -24,13 +25,13 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function PartialBadge() {
+function CoClaimedBadge() {
   return (
     <Badge
       variant="outline"
       className="text-[10px] font-medium bg-[hsl(270,70%,55%)]/10 text-[hsl(270,70%,45%)] border-[hsl(270,70%,55%)]/20"
     >
-      Partially co-claimed
+      Co-claimed
     </Badge>
   );
 }
@@ -90,8 +91,8 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
                 <TableCell className="text-sm font-medium max-w-[200px] truncate">{m.materialName}</TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-1 items-start">
-                    <StatusBadge status={m.status} />
-                    {m.parentMovementId && <PartialBadge />}
+                    <StatusBadge status={m.status === "Claimed" && m.parentMovementId ? "Co-claimed" : m.status} />
+                    {m.status === "Booked" && m.parentMovementId && <CoClaimedBadge />}
                   </div>
                 </TableCell>
                 <TableCell className="text-sm">{m.conversionRate}%</TableCell>
