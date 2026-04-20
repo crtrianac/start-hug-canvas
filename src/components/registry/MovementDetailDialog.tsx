@@ -40,13 +40,12 @@ function Timeline({ events }: { events: Movement["timeline"] }) {
           <div>
             <p className="text-sm font-semibold text-foreground">{evt.label}</p>
             <p className="text-xs text-muted-foreground">Movement Id: {evt.movementId}</p>
-            <p className="text-xs text-muted-foreground">{evt.type}</p>
             <p className="text-xs text-muted-foreground">{evt.date}</p>
             <p className="text-xs text-muted-foreground">{evt.description}</p>
             {evt.actor && (
               <p className="text-xs text-muted-foreground">By: {evt.actor}</p>
             )}
-            {evt.documentUrl && (
+            {evt.label === "Certificate retired (claimed)" && evt.documentUrl && (
               <a
                 href={evt.documentUrl}
                 target="_blank"
