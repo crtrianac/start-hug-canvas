@@ -107,7 +107,7 @@ export function getMovementStatusLabel(movement: Movement) {
   return movement.status;
 }
 
-export function applyClaimToMovements(movements: Movement[], args: ApplyClaimArgs) {
+export function applyClaimToMovements(movements: Movement[], args: ApplyClaimArgs): Movement[] {
   const target = movements.find((movement) => movement.id === args.movementId);
 
   if (!target) return movements;
@@ -123,42 +123,42 @@ export function applyClaimToMovements(movements: Movement[], args: ApplyClaimArg
   const actor = args.onBehalfOf ? `${target.plantOrCustomer} on behalf of ${args.onBehalfOf}` : target.plantOrCustomer;
 
   if (remainderTons <= 0) {
+    const fullyClaimedMovement: Movement = {
+      ...target,
+      status: "Claimed",
+      movementType: "Claimed",
+      tons: claimedTons,
+      totalTons: claimedTons,
+      totalEmissions: claimedEmissions,
+      reportingGood: args.reportingGood,
+      claimedPercentage: args.percentage,
+      claimType: args.claimType,
+      onBehalfOf: args.onBehalfOf,
+      emissionAllocationFactor: args.emissionAllocationFactor,
+      massBalanceFactor: args.massBalanceFactor,
+      timeline: [
+        ...target.timeline,
+        {
+          label: "Certificate retired (claimed)",
+          movementId: target.movementId,
+          type: "Claim",
+          date: nowStr,
+          description: `Claimed ${args.percentage}% by ${args.onBehalfOf ?? target.plantOrCustomer} — ${args.reportingGood}`,
+          actor,
+          documentUrl: buildClaimDocumentUrl(target.movementId),
+        },
+      ],
+    };
+
     return movements.map((movement) =>
-      movement.id === args.movementId
-        ? {
-            ...target,
-            status: "Claimed",
-            movementType: "Claimed",
-            tons: claimedTons,
-            totalTons: claimedTons,
-            totalEmissions: claimedEmissions,
-            reportingGood: args.reportingGood,
-            claimedPercentage: args.percentage,
-            claimType: args.claimType,
-            onBehalfOf: args.onBehalfOf,
-            emissionAllocationFactor: args.emissionAllocationFactor,
-            massBalanceFactor: args.massBalanceFactor,
-            timeline: [
-              ...target.timeline,
-              {
-                label: "Certificate retired (claimed)",
-                movementId: target.movementId,
-                type: "Claim",
-                date: nowStr,
-                description: `Claimed ${args.percentage}% by ${args.onBehalfOf ?? target.plantOrCustomer} — ${args.reportingGood}`,
-                actor,
-                documentUrl: buildClaimDocumentUrl(target.movementId),
-              },
-            ],
-          }
-        : movement
+      movement.id === args.movementId ? fullyClaimedMovement : movement
     );
   }
 
   const { nextSplit, claimedId, remainderId } = createSplitMovementIds(target.movementId);
   const parentRef = target.parentMovementId ?? target.movementId;
   const isAllocated = args.claimType === "Allocated";
-  const timelineExtensions = isAllocated
+  const timelineExtensions: { claimedEvents: TimelineEvent[]; remainderEvents: TimelineEvent[] } = isAllocated
     ? createCoClaimTimelineEvents({
         target,
         claimedId,
