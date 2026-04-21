@@ -9,6 +9,7 @@ import { CreateClaimDialog } from "@/components/registry/CreateClaimDialog";
 import { CarbonDatabaseTab } from "@/components/registry/CarbonDatabaseTab";
 import { initialMovements, Movement, ReportingGood, ClaimType } from "@/data/registryData";
 import { toast } from "@/hooks/use-toast";
+import { applyClaimToMovements } from "@/lib/coClaiming";
 
 const defaultFilters = {
   product: "all",
@@ -52,6 +53,21 @@ export default function Index() {
     setClaimOpen(true);
   }, []);
 
+  const handleOpenLinkedMovement = useCallback(
+    (movementId: string) => {
+      const linkedMovement = movements.find((movement) => movement.movementId === movementId);
+
+      if (!linkedMovement) {
+        toast({ title: "Movement not found", description: `Could not locate movement ${movementId}.` });
+        return;
+      }
+
+      setDetailMovement(linkedMovement);
+      setDetailOpen(true);
+    },
+    [movements]
+  );
+
   const handleInitiateClaim = useCallback(
     (
       movementId: string,
@@ -62,96 +78,33 @@ export default function Index() {
       emissionAllocationFactor?: number,
       massBalanceFactor?: number
     ) => {
-      setMovements((prev) => {
-        const target = prev.find((m) => m.id === movementId);
-        if (!target) return prev;
-
-        const originalTons = target.tons;
-        const originalEmissions = target.totalEmissions ?? Math.round(originalTons * 0.7);
-        const claimedTons = Math.round((originalTons * percentage) / 100);
-        const claimedEmissions = Math.round(((originalEmissions * percentage) / 100) * 10) / 10;
-        const remainderTons = originalTons - claimedTons;
-        const remainderEmissions = Math.round((originalEmissions - claimedEmissions) * 10) / 10;
-        const nowStr = new Date().toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" });
-
-        const claimedMovement: Movement = {
-          ...target,
-          status: "Claimed",
-          movementType: "Claimed",
-          tons: claimedTons,
-          totalTons: claimedTons,
-          totalEmissions: claimedEmissions,
+      setMovements((prev) =>
+        applyClaimToMovements(prev, {
+          movementId,
           reportingGood,
-          claimedPercentage: percentage,
+          percentage,
           claimType,
           onBehalfOf,
           emissionAllocationFactor,
           massBalanceFactor,
-          timeline: [
-            ...target.timeline,
-            {
-              label: "Certificate retired (claimed)",
-              movementId: target.movementId,
-              type: "GoodsMovement",
-              date: nowStr,
-              description: `Claimed ${percentage}% by ${onBehalfOf ?? target.plantOrCustomer} — ${reportingGood}`,
-              actor: onBehalfOf ? `${target.plantOrCustomer} on behalf of ${onBehalfOf}` : target.plantOrCustomer,
-              documentUrl: `/docs/${target.movementId}-claim.pdf`,
-            },
-          ],
-        };
-
-        if (remainderTons <= 0) {
-          return prev.map((m) => (m.id === movementId ? claimedMovement : m));
-        }
-
-        const splitMatch = target.movementId.match(/-S(\d+)[CR]?$/);
-        const baseId = target.movementId.replace(/-S\d+[CR]?$/, "");
-        const nextSplit = (splitMatch ? parseInt(splitMatch[1], 10) : 0) + 1;
-        const claimedId = `${baseId}-S${nextSplit}C`;
-        const remainderId = `${baseId}-S${nextSplit}R`;
-
-        const parentRef = target.parentMovementId ?? target.movementId;
-        const claimedSplit: Movement = {
-          ...claimedMovement,
-          id: `${target.id}-c${nextSplit}`,
-          movementId: claimedId,
-          parentMovementId: parentRef,
-        };
-        const remainderSplit: Movement = {
-          ...target,
-          id: `${target.id}-r${nextSplit}`,
-          movementId: remainderId,
-          status: "Booked",
-          movementType: "Booked",
-          tons: remainderTons,
-          totalTons: remainderTons,
-          totalEmissions: remainderEmissions,
-          parentMovementId: parentRef,
-          timeline: [
-            ...target.timeline,
-            {
-              label: "Certificate transferred",
-              movementId: remainderId,
-              type: "GoodsMovement",
-              date: nowStr,
-              description: `Remaining ${remainderTons.toLocaleString()} t after partial claim of ${percentage}%`,
-              actor: target.plantOrCustomer,
-            },
-          ],
-        };
-
-        return prev.flatMap((m) =>
-          m.id === movementId ? [claimedSplit, remainderSplit] : [m]
-        );
-      });
+        })
+      );
 
       toast({
-        title: percentage < 100 ? "Partial claim initiated" : "Claim initiated",
+        title:
+          claimType === "Allocated"
+            ? percentage < 100
+              ? "Partial co-claim initiated"
+              : "Co-claim initiated"
+            : percentage < 100
+              ? "Partial claim initiated"
+              : "Claim initiated",
         description:
-          percentage < 100
-            ? `${percentage}% claimed as "${reportingGood}". Remainder stays Booked and can still be claimed.`
-            : `Movement ${movementId} has been claimed as "${reportingGood}".`,
+          claimType === "Allocated" && percentage < 100
+            ? `${percentage}% is now co-claimed. The linked remainder stays Booked with a batch co-claimed reference.`
+            : percentage < 100
+              ? `${percentage}% claimed as "${reportingGood}". Remainder stays Booked and can still be claimed.`
+              : `Movement ${movementId} has been claimed as "${reportingGood}".`,
       });
     },
     []
@@ -205,6 +158,7 @@ export default function Index() {
         movement={detailMovement}
         open={detailOpen}
         onOpenChange={setDetailOpen}
+        onOpenMovement={handleOpenLinkedMovement}
       />
       <CreateClaimDialog
         movement={claimMovement}

@@ -1,8 +1,10 @@
-import { Award, FileDown, Eye } from "lucide-react";
+import { Award, FileDown, Eye, Link2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Movement } from "@/data/registryData";
+import { getMovementStatusLabel, hasBatchCoClaim } from "@/lib/coClaiming";
+import { cn } from "@/lib/utils";
 
 interface MovementsTableProps {
   movements: Movement[];
@@ -14,9 +16,10 @@ interface MovementsTableProps {
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     Issued: "bg-primary/10 text-primary border-primary/20",
-    Booked: "bg-[hsl(30,80%,50%)]/10 text-[hsl(30,80%,40%)] border-[hsl(30,80%,50%)]/20",
-    Claimed: "bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,35%)] border-[hsl(142,70%,45%)]/20",
-    "Co-claimed": "bg-[hsl(270,70%,55%)]/10 text-[hsl(270,70%,45%)] border-[hsl(270,70%,55%)]/20",
+    Booked: "bg-status-booked/10 text-status-booked-foreground border-status-booked/20",
+    Claimed: "bg-status-claimed/10 text-status-claimed-foreground border-status-claimed/20",
+    "Co-claimed": "bg-status-coclaimed/10 text-status-coclaimed-foreground border-status-coclaimed/20",
+    "Batch co-claimed": "bg-status-coclaimed/10 text-status-coclaimed-foreground border-status-coclaimed/20",
   };
   return (
     <Badge variant="outline" className={`text-xs font-medium ${styles[status] || ""}`}>
@@ -25,13 +28,13 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function CoClaimedBadge() {
+function BatchCoClaimBadge() {
   return (
     <Badge
       variant="outline"
-      className="text-[10px] font-medium bg-[hsl(270,70%,55%)]/10 text-[hsl(270,70%,45%)] border-[hsl(270,70%,55%)]/20"
+      className="text-[10px] font-medium bg-status-coclaimed/10 text-status-coclaimed-foreground border-status-coclaimed/20"
     >
-      Co-claimed
+      Batch co-claimed
     </Badge>
   );
 }
@@ -56,11 +59,11 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
         </div>
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">Booked:</span>
-          <span className="font-medium text-[hsl(30,80%,50%)]">{bookedTons.toLocaleString()} t</span>
+          <span className="font-medium text-status-booked">{bookedTons.toLocaleString()} t</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">Claimed:</span>
-          <span className="font-medium text-[hsl(142,70%,45%)]">{claimedTons.toLocaleString()} t</span>
+          <span className="font-medium text-status-claimed">{claimedTons.toLocaleString()} t</span>
         </div>
         <div className="ml-auto">
           <Button variant="outline" size="sm" onClick={onExportCSV} className="text-xs">
@@ -86,13 +89,29 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
             </TableRow>
           </TableHeader>
           <TableBody>
-            {movements.map((m) => (
-              <TableRow key={m.id} className="hover:bg-muted/30">
+            {movements.map((m) => {
+              const relatedMovement = m.counterpartMovementId
+                ? movements.find((candidate) => candidate.movementId === m.counterpartMovementId)
+                : undefined;
+
+              return (
+              <TableRow key={m.id} id={`movement-row-${m.movementId}`} className="hover:bg-muted/30">
                 <TableCell className="text-sm font-medium max-w-[200px] truncate">{m.materialName}</TableCell>
                 <TableCell>
-                  <div className="flex flex-col gap-1 items-start">
-                    <StatusBadge status={m.status === "Claimed" && m.parentMovementId ? "Co-claimed" : m.status} />
-                    {m.status === "Booked" && m.parentMovementId && <CoClaimedBadge />}
+                  <div className="flex flex-col gap-1.5 items-start">
+                    <StatusBadge status={getMovementStatusLabel(m)} />
+                    {hasBatchCoClaim(m) && <BatchCoClaimBadge />}
+                    {relatedMovement && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className={cn("h-auto p-0 text-xs text-muted-foreground", "hover:text-foreground")}
+                        onClick={() => onViewDetails(relatedMovement)}
+                      >
+                        <Link2 className="h-3 w-3" />
+                        {relatedMovement.movementId}
+                      </Button>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="text-sm">{m.conversionRate}%</TableCell>
@@ -115,7 +134,7 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-xs text-[hsl(142,70%,35%)] h-7 px-2"
+                        className="text-xs text-status-claimed-foreground h-7 px-2"
                         onClick={() => onClaim(m)}
                       >
                         <Award className="h-3 w-3 mr-1" /> Claim
@@ -129,7 +148,7 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+            )})}
           </TableBody>
         </Table>
       </div>
