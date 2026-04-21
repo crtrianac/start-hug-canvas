@@ -31,6 +31,14 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        status: {
+          booked: "hsl(var(--status-booked))",
+          "booked-foreground": "hsl(var(--status-booked-foreground))",
+          claimed: "hsl(var(--status-claimed))",
+          "claimed-foreground": "hsl(var(--status-claimed-foreground))",
+          coclaimed: "hsl(var(--status-coclaimed))",
+          "coclaimed-foreground": "hsl(var(--status-coclaimed-foreground))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",

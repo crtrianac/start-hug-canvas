@@ -11,6 +11,7 @@ export interface TimelineEvent {
   description: string;
   actor?: string;
   documentUrl?: string;
+  relatedMovementId?: string;
 }
 
 export interface Movement {
@@ -34,6 +35,7 @@ export interface Movement {
   massBalanceFactor?: number;
   onBehalfOf?: string;
   parentMovementId?: string;
+  counterpartMovementId?: string;
   timeline: TimelineEvent[];
 }
 
