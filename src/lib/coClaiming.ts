@@ -39,6 +39,8 @@ function createCoClaimTimelineEvents({
   percentage,
   nowStr,
   actor,
+  claimedTons,
+  remainderTons,
 }: {
   target: Movement;
   claimedId: string;
@@ -47,6 +49,8 @@ function createCoClaimTimelineEvents({
   percentage: number;
   nowStr: string;
   actor: string;
+  claimedTons: number;
+  remainderTons: number;
 }): { claimedEvents: TimelineEvent[]; remainderEvents: TimelineEvent[] } {
   return {
     claimedEvents: [
@@ -58,6 +62,7 @@ function createCoClaimTimelineEvents({
         description: `Co-claimed ${percentage}% of the batch with remaining booked movement ${remainderId}`,
         actor,
         relatedMovementId: remainderId,
+        tons: claimedTons,
       },
       {
         label: "Certificate retired (claimed)",
@@ -68,6 +73,7 @@ function createCoClaimTimelineEvents({
         actor,
         documentUrl: buildClaimDocumentUrl(claimedId),
         relatedMovementId: remainderId,
+        tons: claimedTons,
       },
     ],
     remainderEvents: [
@@ -79,6 +85,7 @@ function createCoClaimTimelineEvents({
         description: `Remaining batch stays booked after co-claim with movement ${claimedId}`,
         actor,
         relatedMovementId: claimedId,
+        tons: remainderTons,
       },
       {
         label: "Certificate retired (claimed)",
@@ -89,6 +96,7 @@ function createCoClaimTimelineEvents({
         actor,
         documentUrl: buildClaimDocumentUrl(claimedId),
         relatedMovementId: claimedId,
+        tons: claimedTons,
       },
     ],
   };
@@ -146,6 +154,7 @@ export function applyClaimToMovements(movements: Movement[], args: ApplyClaimArg
           description: `Claimed ${args.percentage}% by ${args.onBehalfOf ?? target.plantOrCustomer} — ${args.reportingGood}`,
           actor,
           documentUrl: buildClaimDocumentUrl(target.movementId),
+          tons: claimedTons,
         },
       ],
     };
@@ -167,6 +176,8 @@ export function applyClaimToMovements(movements: Movement[], args: ApplyClaimArg
         percentage: args.percentage,
         nowStr,
         actor,
+        claimedTons,
+        remainderTons,
       })
     : {
         claimedEvents: [
@@ -179,6 +190,7 @@ export function applyClaimToMovements(movements: Movement[], args: ApplyClaimArg
             actor,
             documentUrl: buildClaimDocumentUrl(claimedId),
             relatedMovementId: remainderId,
+            tons: claimedTons,
           },
         ],
         remainderEvents: [
@@ -190,6 +202,7 @@ export function applyClaimToMovements(movements: Movement[], args: ApplyClaimArg
             description: `Remaining ${remainderTons.toLocaleString()} t after partial claim of ${args.percentage}%`,
             actor: target.plantOrCustomer,
             relatedMovementId: claimedId,
+            tons: remainderTons,
           },
         ],
       };
