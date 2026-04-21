@@ -12,6 +12,7 @@ export interface TimelineEvent {
   actor?: string;
   documentUrl?: string;
   relatedMovementId?: string;
+  tons?: number;
 }
 
 export interface Movement {

@@ -47,6 +47,9 @@ function Timeline({ events, onOpenMovement }: { events: Movement["timeline"]; on
             <p className="text-xs text-muted-foreground">Movement Id: {evt.movementId}</p>
             <p className="text-xs text-muted-foreground">{evt.date}</p>
             <p className="text-xs text-muted-foreground">{evt.description}</p>
+            {typeof evt.tons === "number" && (
+              <p className="text-xs font-medium text-foreground">Amount: {evt.tons.toLocaleString()} t</p>
+            )}
             {evt.actor && (
               <p className="text-xs text-muted-foreground">By: {evt.actor}</p>
             )}
