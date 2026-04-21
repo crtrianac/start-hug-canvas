@@ -80,9 +80,11 @@ describe("co-claiming flow", () => {
     const stillHasOriginal = result.some((m) => m.id === target.id);
     expect(stillHasOriginal).toBe(false);
 
-    const splits = result.filter((m) => m.parentMovementId === (target.parentMovementId ?? target.movementId) && m.id !== target.id);
+    const splits = result.filter((m) => m.id.startsWith(`${target.id}-`));
     const claimed = splits.find((m) => m.status === "Claimed");
     const remainder = splits.find((m) => m.status === "Booked");
+
+    expect(splits).toHaveLength(2);
 
     expect(claimed?.tons).toBe(100);
     expect(remainder?.tons).toBe(100);
