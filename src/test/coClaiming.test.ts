@@ -64,4 +64,28 @@ describe("co-claiming flow", () => {
       "Certificate retired (claimed)",
     ]);
   });
+
+  it("preserves total tons when partially co-claiming a 200 t booked movement (no double-counting)", () => {
+    // Use the seeded booked remainder MOV-2024-008-R1 (200 t) and co-claim 50%
+    const target = initialMovements.find((m) => m.movementId === "MOV-2024-008-R1")!;
+    const result = applyClaimToMovements(initialMovements, {
+      movementId: target.id,
+      reportingGood: "Industrials",
+      percentage: 50,
+      claimType: "Allocated",
+      now: new Date("2025-02-01T10:00:00Z"),
+    });
+
+    // Original row is removed, replaced by two splits whose tons sum to 200
+    const stillHasOriginal = result.some((m) => m.id === target.id);
+    expect(stillHasOriginal).toBe(false);
+
+    const splits = result.filter((m) => m.parentMovementId === (target.parentMovementId ?? target.movementId) && m.id !== target.id);
+    const claimed = splits.find((m) => m.status === "Claimed");
+    const remainder = splits.find((m) => m.status === "Booked");
+
+    expect(claimed?.tons).toBe(100);
+    expect(remainder?.tons).toBe(100);
+    expect((claimed?.tons ?? 0) + (remainder?.tons ?? 0)).toBe(target.tons);
+  });
 });
