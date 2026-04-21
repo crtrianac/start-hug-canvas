@@ -68,7 +68,7 @@ export const initialMovements: Movement[] = [
     totalTons: 1200,
     totalEmissions: 840,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-001", type: "GoodsMovement", date: "12/01/2024 09:30 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-001-issuance.pdf" },
+      { label: "Certificate issued", movementId: "MOV-2024-001", type: "GoodsMovement", date: "12/01/2024 09:30 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-001-issuance.pdf" , tons: 1200 },
     ],
   },
   {
@@ -86,8 +86,8 @@ export const initialMovements: Movement[] = [
     totalTons: 800,
     totalEmissions: 560,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-002", type: "GoodsMovement", date: "12/01/2024 09:30 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-002-issuance.pdf" },
-      { label: "Certificate transferred", movementId: "MOV-2024-002", type: "GoodsMovement", date: "12/05/2024 02:15 PM", description: "Booked to PepsiCo Europe", actor: "Sales Desk — A. Müller", documentUrl: "/docs/MOV-2024-002-booking.pdf" },
+      { label: "Certificate issued", movementId: "MOV-2024-002", type: "GoodsMovement", date: "12/01/2024 09:30 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-002-issuance.pdf" , tons: 800 },
+      { label: "Certificate transferred", movementId: "MOV-2024-002", type: "GoodsMovement", date: "12/05/2024 02:15 PM", description: "Booked to PepsiCo Europe", actor: "Sales Desk — A. Müller", documentUrl: "/docs/MOV-2024-002-booking.pdf" , tons: 800 },
     ],
   },
   {
@@ -107,9 +107,9 @@ export const initialMovements: Movement[] = [
     totalTons: 500,
     totalEmissions: 350,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-003", type: "GoodsMovement", date: "11/30/2024 01:00 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-003-issuance.pdf" },
-      { label: "Certificate transferred", movementId: "MOV-2024-003", type: "GoodsMovement", date: "12/05/2024 10:00 AM", description: "Booked to PepsiCo Europe", actor: "Sales Desk — A. Müller", documentUrl: "/docs/MOV-2024-003-booking.pdf" },
-      { label: "Certificate retired (claimed)", movementId: "MOV-2024-003", type: "GoodsMovement", date: "12/10/2024 11:00 AM", description: "Claimed by PepsiCo Europe — Fertilizers", actor: "PepsiCo Sustainability Team", documentUrl: "/docs/MOV-2024-003-claim.pdf" },
+      { label: "Certificate issued", movementId: "MOV-2024-003", type: "GoodsMovement", date: "11/30/2024 01:00 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-003-issuance.pdf" , tons: 500 },
+      { label: "Certificate transferred", movementId: "MOV-2024-003", type: "GoodsMovement", date: "12/05/2024 10:00 AM", description: "Booked to PepsiCo Europe", actor: "Sales Desk — A. Müller", documentUrl: "/docs/MOV-2024-003-booking.pdf" , tons: 500 },
+      { label: "Certificate retired (claimed)", movementId: "MOV-2024-003", type: "GoodsMovement", date: "12/10/2024 11:00 AM", description: "Claimed by PepsiCo Europe — Fertilizers", actor: "PepsiCo Sustainability Team", documentUrl: "/docs/MOV-2024-003-claim.pdf" , tons: 500 },
     ],
   },
   {
@@ -127,7 +127,7 @@ export const initialMovements: Movement[] = [
     totalTons: 2000,
     totalEmissions: 1400,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-004", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-004-issuance.pdf" },
+      { label: "Certificate issued", movementId: "MOV-2024-004", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-004-issuance.pdf" , tons: 2000 },
     ],
   },
   {
@@ -145,8 +145,8 @@ export const initialMovements: Movement[] = [
     totalTons: 1500,
     totalEmissions: 1050,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-005", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-005-issuance.pdf" },
-      { label: "Certificate transferred", movementId: "MOV-2024-005", type: "GoodsMovement", date: "11/28/2024 04:30 PM", description: "Booked to Nestlé UK", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-005-booking.pdf" },
+      { label: "Certificate issued", movementId: "MOV-2024-005", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-005-issuance.pdf" , tons: 1500 },
+      { label: "Certificate transferred", movementId: "MOV-2024-005", type: "GoodsMovement", date: "11/28/2024 04:30 PM", description: "Booked to Nestlé UK", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-005-booking.pdf" , tons: 1500 },
     ],
   },
   {
@@ -166,9 +166,9 @@ export const initialMovements: Movement[] = [
     totalTons: 600,
     totalEmissions: 420,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-006", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-006-issuance.pdf" },
-      { label: "Certificate transferred", movementId: "MOV-2024-006", type: "GoodsMovement", date: "11/28/2024 04:30 PM", description: "Booked to Nestlé UK", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-006-booking.pdf" },
-      { label: "Certificate retired (claimed)", movementId: "MOV-2024-006", type: "GoodsMovement", date: "12/02/2024 01:20 PM", description: "Claimed by Nestlé UK — Energy", actor: "Nestlé ESG Team", documentUrl: "/docs/MOV-2024-006-claim.pdf" },
+      { label: "Certificate issued", movementId: "MOV-2024-006", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-006-issuance.pdf" , tons: 600 },
+      { label: "Certificate transferred", movementId: "MOV-2024-006", type: "GoodsMovement", date: "11/28/2024 04:30 PM", description: "Booked to Nestlé UK", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-006-booking.pdf" , tons: 600 },
+      { label: "Certificate retired (claimed)", movementId: "MOV-2024-006", type: "GoodsMovement", date: "12/02/2024 01:20 PM", description: "Claimed by Nestlé UK — Energy", actor: "Nestlé ESG Team", documentUrl: "/docs/MOV-2024-006-claim.pdf" , tons: 600 },
     ],
   },
   {
@@ -186,7 +186,7 @@ export const initialMovements: Movement[] = [
     totalTons: 950,
     totalEmissions: 665,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-007", type: "GoodsMovement", date: "12/15/2024 10:00 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-007-issuance.pdf" },
+      { label: "Certificate issued", movementId: "MOV-2024-007", type: "GoodsMovement", date: "12/15/2024 10:00 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-007-issuance.pdf" , tons: 950 },
     ],
   },
   {
@@ -211,10 +211,10 @@ export const initialMovements: Movement[] = [
     totalTons: 200,
     totalEmissions: 140,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-008", type: "GoodsMovement", date: "11/10/2024 09:00 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-008-issuance.pdf" },
-      { label: "Certificate transferred", movementId: "MOV-2024-008", type: "GoodsMovement", date: "11/13/2024 02:00 PM", description: "Booked to BASF SE", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-008-booking.pdf" },
-      { label: "Batch co-claimed", movementId: "MOV-2024-008", type: "CoClaim", date: "11/15/2024 09:10 AM", description: "Co-claimed 50% of the batch with remaining booked movement MOV-2024-008-R1", actor: "BASF Sustainability", relatedMovementId: "MOV-2024-008-R1" },
-      { label: "Certificate retired (claimed)", movementId: "MOV-2024-008", type: "Claim", date: "11/15/2024 09:10 AM", description: "Co-claimed as Industrials. Remaining booked batch MOV-2024-008-R1 stays available.", actor: "BASF Sustainability", documentUrl: "/docs/MOV-2024-008-claim.pdf", relatedMovementId: "MOV-2024-008-R1" },
+      { label: "Certificate issued", movementId: "MOV-2024-008", type: "GoodsMovement", date: "11/10/2024 09:00 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-008-issuance.pdf" , tons: 200 },
+      { label: "Certificate transferred", movementId: "MOV-2024-008", type: "GoodsMovement", date: "11/13/2024 02:00 PM", description: "Booked to BASF SE", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-008-booking.pdf" , tons: 200 },
+      { label: "Batch co-claimed", movementId: "MOV-2024-008", type: "CoClaim", date: "11/15/2024 09:10 AM", description: "Co-claimed 50% of the batch with remaining booked movement MOV-2024-008-R1", actor: "BASF Sustainability", relatedMovementId: "MOV-2024-008-R1" , tons: 200 },
+      { label: "Certificate retired (claimed)", movementId: "MOV-2024-008", type: "Claim", date: "11/15/2024 09:10 AM", description: "Co-claimed as Industrials. Remaining booked batch MOV-2024-008-R1 stays available.", actor: "BASF Sustainability", documentUrl: "/docs/MOV-2024-008-claim.pdf", relatedMovementId: "MOV-2024-008-R1" , tons: 200 },
     ],
   },
   {
@@ -238,10 +238,10 @@ export const initialMovements: Movement[] = [
     totalTons: 200,
     totalEmissions: 140,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-008-R1", type: "GoodsMovement", date: "11/10/2024 09:00 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-008-issuance.pdf" },
-      { label: "Certificate transferred", movementId: "MOV-2024-008-R1", type: "GoodsMovement", date: "11/13/2024 02:00 PM", description: "Booked to BASF SE", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-008-booking.pdf" },
-      { label: "Batch co-claimed", movementId: "MOV-2024-008-R1", type: "CoClaim", date: "11/15/2024 09:10 AM", description: "Remaining batch stays booked after co-claim with movement MOV-2024-008", actor: "BASF Sustainability", relatedMovementId: "MOV-2024-008" },
-      { label: "Certificate retired (claimed)", movementId: "MOV-2024-008", type: "Claim", date: "11/15/2024 09:10 AM", description: "Related co-claimed movement MOV-2024-008 was retired as Industrials", actor: "BASF Sustainability", documentUrl: "/docs/MOV-2024-008-claim.pdf", relatedMovementId: "MOV-2024-008" },
+      { label: "Certificate issued", movementId: "MOV-2024-008-R1", type: "GoodsMovement", date: "11/10/2024 09:00 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-008-issuance.pdf" , tons: 200 },
+      { label: "Certificate transferred", movementId: "MOV-2024-008-R1", type: "GoodsMovement", date: "11/13/2024 02:00 PM", description: "Booked to BASF SE", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-008-booking.pdf" , tons: 200 },
+      { label: "Batch co-claimed", movementId: "MOV-2024-008-R1", type: "CoClaim", date: "11/15/2024 09:10 AM", description: "Remaining batch stays booked after co-claim with movement MOV-2024-008", actor: "BASF Sustainability", relatedMovementId: "MOV-2024-008" , tons: 200 },
+      { label: "Certificate retired (claimed)", movementId: "MOV-2024-008", type: "Claim", date: "11/15/2024 09:10 AM", description: "Related co-claimed movement MOV-2024-008 was retired as Industrials", actor: "BASF Sustainability", documentUrl: "/docs/MOV-2024-008-claim.pdf", relatedMovementId: "MOV-2024-008" , tons: 200 },
     ],
   },
   {
@@ -259,8 +259,8 @@ export const initialMovements: Movement[] = [
     totalTons: 350,
     totalEmissions: 245,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-009", type: "GoodsMovement", date: "12/15/2024 10:00 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-009-issuance.pdf" },
-      { label: "Certificate transferred", movementId: "MOV-2024-009", type: "GoodsMovement", date: "12/18/2024 03:45 PM", description: "Booked to Cargill Germany", actor: "Sales Desk — A. Müller", documentUrl: "/docs/MOV-2024-009-booking.pdf" },
+      { label: "Certificate issued", movementId: "MOV-2024-009", type: "GoodsMovement", date: "12/15/2024 10:00 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-009-issuance.pdf" , tons: 350 },
+      { label: "Certificate transferred", movementId: "MOV-2024-009", type: "GoodsMovement", date: "12/18/2024 03:45 PM", description: "Booked to Cargill Germany", actor: "Sales Desk — A. Müller", documentUrl: "/docs/MOV-2024-009-booking.pdf" , tons: 350 },
     ],
   },
   {
@@ -278,8 +278,8 @@ export const initialMovements: Movement[] = [
     totalTons: 720,
     totalEmissions: 504,
     timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-010", type: "GoodsMovement", date: "12/15/2024 08:00 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-010-issuance.pdf" },
-      { label: "Certificate transferred", movementId: "MOV-2024-010", type: "GoodsMovement", date: "12/20/2024 11:30 AM", description: "Booked to ABF Ingredients", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-010-booking.pdf" },
+      { label: "Certificate issued", movementId: "MOV-2024-010", type: "GoodsMovement", date: "12/15/2024 08:00 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-010-issuance.pdf" , tons: 720 },
+      { label: "Certificate transferred", movementId: "MOV-2024-010", type: "GoodsMovement", date: "12/20/2024 11:30 AM", description: "Booked to ABF Ingredients", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-010-booking.pdf" , tons: 720 },
     ],
   },
 ];
