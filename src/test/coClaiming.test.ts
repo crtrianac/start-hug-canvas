@@ -50,25 +50,37 @@ describe("co-claiming flow", () => {
     expect(isCoClaimedMovement(claimedMovement!)).toBe(true);
     expect(getMovementStatusLabel(claimedMovement!)).toBe("Co-claimed");
     expect(claimedMovement?.counterpartMovementId).toBe("MOV-2024-008-R1");
+    expect(claimedMovement?.tons).toBe(100);
 
     expect(bookedMovement?.status).toBe("Booked");
     expect(hasBatchCoClaim(bookedMovement!)).toBe(true);
     expect(bookedMovement?.counterpartMovementId).toBe("MOV-2024-008");
+    expect(bookedMovement?.tons).toBe(100);
 
     expect(claimedMovement?.timeline.slice(-2).map((event) => event.label)).toEqual([
       "Batch co-claimed",
       "Certificate retired (claimed)",
     ]);
+    expect(claimedMovement?.timeline.slice(-2).map((event) => event.tons)).toEqual([100, 100]);
     expect(bookedMovement?.timeline.slice(-2).map((event) => event.label)).toEqual([
       "Batch co-claimed",
       "Certificate retired (claimed)",
     ]);
+    expect(bookedMovement?.timeline.slice(-2).map((event) => event.tons)).toEqual([100, 100]);
   });
 
   it("preserves total tons when partially co-claiming a 200 t booked movement (no double-counting)", () => {
-    // Use the seeded booked remainder MOV-2024-008-R1 (200 t) and co-claim 50%
-    const target = initialMovements.find((m) => m.movementId === "MOV-2024-008-R1")!;
-    const result = applyClaimToMovements(initialMovements, {
+    const target = {
+      ...initialMovements.find((m) => m.movementId === "MOV-2024-002")!,
+      id: "test-200",
+      movementId: "MOV-TEST-200",
+      tons: 200,
+      totalTons: 200,
+      totalEmissions: 140,
+      timeline: [],
+    };
+
+    const result = applyClaimToMovements([target], {
       movementId: target.id,
       reportingGood: "Industrials",
       percentage: 50,
@@ -89,5 +101,7 @@ describe("co-claiming flow", () => {
     expect(claimed?.tons).toBe(100);
     expect(remainder?.tons).toBe(100);
     expect((claimed?.tons ?? 0) + (remainder?.tons ?? 0)).toBe(target.tons);
+    expect(claimed?.timeline.slice(-2).map((event) => event.tons)).toEqual([100, 100]);
+    expect(remainder?.timeline.slice(-2).map((event) => event.tons)).toEqual([100, 100]);
   });
 });
