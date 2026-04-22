@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AIChatPlaceholder } from "@/components/registry/AIChatPlaceholder";
 import { FilterBar } from "@/components/registry/FilterBar";
@@ -7,9 +7,9 @@ import { MovementsTable } from "@/components/registry/MovementsTable";
 import { MovementDetailDialog } from "@/components/registry/MovementDetailDialog";
 import { CreateClaimDialog } from "@/components/registry/CreateClaimDialog";
 import { CarbonDatabaseTab } from "@/components/registry/CarbonDatabaseTab";
-import { initialMovements, Movement, ReportingGood, ClaimType } from "@/data/registryData";
+import { initialDeliveryItems, DeliveryItem, ReportingGood } from "@/data/registryData";
 import { toast } from "@/hooks/use-toast";
-import { applyClaimToMovements } from "@/lib/coClaiming";
+import { applyBatchClaim } from "@/lib/batchClaim";
 
 const defaultFilters = {
   product: "all",
@@ -19,121 +19,96 @@ const defaultFilters = {
 };
 
 export default function Index() {
-  const [movements, setMovements] = useState<Movement[]>(initialMovements);
+  const [items, setItems] = useState<DeliveryItem[]>(initialDeliveryItems);
   const [filters, setFilters] = useState(defaultFilters);
-  const [detailMovement, setDetailMovement] = useState<Movement | null>(null);
-  const [claimMovement, setClaimMovement] = useState<Movement | null>(null);
+  const [detailItem, setDetailItem] = useState<DeliveryItem | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [initialClaimSelection, setInitialClaimSelection] = useState<string[]>([]);
 
   const handleFilterChange = useCallback((key: string, value: string) => {
     setFilters((f) => ({ ...f, [key]: value }));
   }, []);
 
-  const filteredMovements = movements.filter((m) => {
+  const filteredItems = items.filter((m) => {
     if (filters.product !== "all") {
       if (filters.product === "nitromag" && !m.materialName.includes("Nitromag")) return false;
       if (filters.product === "axan" && !m.materialName.includes("Axan")) return false;
     }
-    if (filters.movementType !== "all" && m.movementType !== filters.movementType) return false;
+    if (filters.movementType !== "all" && m.status !== filters.movementType) return false;
     if (filters.plant !== "all") {
-      if (filters.plant === "brunsbuttel" && m.plantOrCustomer !== "Brunsbüttel") return false;
-      if (filters.plant === "hull" && m.plantOrCustomer !== "Hull") return false;
+      if (filters.plant === "brunsbuttel" && m.originPlant !== "Brunsbüttel") return false;
+      if (filters.plant === "hull" && m.originPlant !== "Hull") return false;
     }
     return true;
   });
 
-  const handleViewDetails = useCallback((m: Movement) => {
-    setDetailMovement(m);
+  const handleViewDetails = useCallback((item: DeliveryItem) => {
+    setDetailItem(item);
     setDetailOpen(true);
   }, []);
 
-  const handleOpenClaim = useCallback((m: Movement) => {
-    setClaimMovement(m);
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectGroup = useCallback((ids: string[], shouldSelect: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => (shouldSelect ? next.add(id) : next.delete(id)));
+      return next;
+    });
+  }, []);
+
+  const openBatchClaim = useCallback(() => {
+    setInitialClaimSelection(Array.from(selectedIds));
+    setClaimOpen(true);
+  }, [selectedIds]);
+
+  const claimGroup = useCallback((ids: string[]) => {
+    setInitialClaimSelection(ids);
     setClaimOpen(true);
   }, []);
 
-  const handleOpenLinkedMovement = useCallback(
-    (movementId: string) => {
-      const linkedMovement = movements.find((movement) => movement.movementId === movementId);
-
-      if (!linkedMovement) {
-        toast({ title: "Movement not found", description: `Could not locate movement ${movementId}.` });
-        return;
-      }
-
-      setDetailMovement(linkedMovement);
-      setDetailOpen(true);
-    },
-    [movements]
-  );
-
-  const handleInitiateClaim = useCallback(
-    (
-      movementId: string,
-      reportingGood: ReportingGood,
-      percentage: number,
-      claimType: ClaimType,
-      onBehalfOf?: string,
-      emissionAllocationFactor?: number,
-      massBalanceFactor?: number
-    ) => {
-      setMovements((prev) =>
-        applyClaimToMovements(prev, {
-          movementId,
-          reportingGood,
-          percentage,
-          claimType,
-          onBehalfOf,
-          emissionAllocationFactor,
-          massBalanceFactor,
-        })
-      );
-
+  const handleConfirmClaim = useCallback(
+    (selectedDeliveryIds: string[], reportingGood: ReportingGood, onBehalfOf?: string) => {
+      setItems((prev) => applyBatchClaim(prev, { deliveryItemIds: selectedDeliveryIds, reportingGood, onBehalfOf }));
+      setSelectedIds(new Set());
       toast({
-        title:
-          claimType === "Allocated"
-            ? percentage < 100
-              ? "Partial co-claim initiated"
-              : "Co-claim initiated"
-            : percentage < 100
-              ? "Partial claim initiated"
-              : "Claim initiated",
-        description:
-          claimType === "Allocated" && percentage < 100
-            ? `${percentage}% is now co-claimed. The linked remainder stays Booked with a batch co-claimed reference.`
-            : percentage < 100
-              ? `${percentage}% claimed as "${reportingGood}". Remainder stays Booked and can still be claimed.`
-              : `Movement ${movementId} has been claimed as "${reportingGood}".`,
+        title: "Batch claim initiated",
+        description: `${selectedDeliveryIds.length} delivery item(s) claimed as ${reportingGood}. One shared PDF generated.`,
       });
     },
     []
   );
 
   const handleExportCSV = useCallback(() => {
-    const headers = [
-      "Material Name", "Status", "Movement Type", "Conversion Rate",
-      "Tons", "Movement ID", "Timestamp", "Plant/Customer", "Reporting Good",
-    ];
-    const rows = filteredMovements.map((m) => [
-      m.materialName, m.status, m.movementType, `${m.conversionRate}%`,
-      m.tons, m.movementId, m.timestamp, m.plantOrCustomer, m.reportingGood || "",
+    const headers = ["Customer", "Sales Document", "Delivery Number", "Actual GI Date", "Material", "Status", "Tons", "Reporting Good", "Claim Batch ID"];
+    const rows = filteredItems.map((m) => [
+      m.customer, m.salesDocument, m.deliveryNumber, m.actualGIDate,
+      m.materialName, m.status, m.tons, m.reportingGood ?? "", m.claimBatchId ?? "",
     ]);
-    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "registry_movements.csv";
+    a.download = "registry_delivery_items.csv";
     a.click();
     URL.revokeObjectURL(url);
-    toast({ title: "CSV exported", description: "Registry movements exported successfully." });
-  }, [filteredMovements]);
+    toast({ title: "CSV exported", description: "Registry delivery items exported." });
+  }, [filteredItems]);
+
+  const claimableItems = items.filter((i) => i.status === "Booked");
 
   return (
     <AppLayout>
       <Tabs defaultValue="registry" className="w-full">
-
         <TabsContent value="registry" className="space-y-0">
           <AIChatPlaceholder />
           <FilterBar
@@ -142,9 +117,13 @@ export default function Index() {
             onClearAll={() => setFilters(defaultFilters)}
           />
           <MovementsTable
-            movements={filteredMovements}
+            items={filteredItems}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
+            onToggleSelectGroup={toggleSelectGroup}
             onViewDetails={handleViewDetails}
-            onClaim={handleOpenClaim}
+            onClaimGroup={claimGroup}
+            onOpenBatchClaim={openBatchClaim}
             onExportCSV={handleExportCSV}
           />
         </TabsContent>
@@ -154,17 +133,13 @@ export default function Index() {
         </TabsContent>
       </Tabs>
 
-      <MovementDetailDialog
-        movement={detailMovement}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-        onOpenMovement={handleOpenLinkedMovement}
-      />
+      <MovementDetailDialog item={detailItem} open={detailOpen} onOpenChange={setDetailOpen} />
       <CreateClaimDialog
-        movement={claimMovement}
         open={claimOpen}
         onOpenChange={setClaimOpen}
-        onInitiateClaim={handleInitiateClaim}
+        claimableItems={claimableItems}
+        initialSelectedIds={initialClaimSelection}
+        onConfirm={handleConfirmClaim}
       />
     </AppLayout>
   );

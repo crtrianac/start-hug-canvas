@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -7,207 +7,191 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { Movement, ReportingGood, ClaimType } from "@/data/registryData";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DeliveryItem, ReportingGood } from "@/data/registryData";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Props {
-  movement: Movement | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onInitiateClaim: (
-    movementId: string,
-    reportingGood: ReportingGood,
-    percentage: number,
-    claimType: ClaimType,
-    onBehalfOf?: string,
-    emissionAllocationFactor?: number,
-    massBalanceFactor?: number
-  ) => void;
+  /** All claimable (Booked) delivery items in the registry. */
+  claimableItems: DeliveryItem[];
+  /** Pre-selected delivery item IDs. User can adjust before confirming. */
+  initialSelectedIds: string[];
+  onConfirm: (selectedIds: string[], reportingGood: ReportingGood, onBehalfOf?: string) => void;
 }
 
-export function CreateClaimDialog({ movement, open, onOpenChange, onInitiateClaim }: Props) {
+export function CreateClaimDialog({ open, onOpenChange, claimableItems, initialSelectedIds, onConfirm }: Props) {
   const [onBehalf, setOnBehalf] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [reportingGood, setReportingGood] = useState<ReportingGood>("Fertilizers");
-  const [percentage, setPercentage] = useState(100);
-  const [claimType, setClaimType] = useState<ClaimType>("Proportional");
-  const [emissionFactor, setEmissionFactor] = useState(50);
-  const [massFactor, setMassFactor] = useState(50);
+  const [customerFilter, setCustomerFilter] = useState<string>("all");
+  const [salesDocFilter, setSalesDocFilter] = useState<string>("all");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (open) {
       setOnBehalf(false);
       setCompanyName("");
       setReportingGood("Fertilizers");
-      setPercentage(100);
-      setClaimType("Proportional");
-      setEmissionFactor(50);
-      setMassFactor(50);
+      setCustomerFilter("all");
+      setSalesDocFilter("all");
+      setSelected(new Set(initialSelectedIds));
     }
-  }, [open]);
+  }, [open, initialSelectedIds]);
 
-  if (!movement) return null;
+  const customers = useMemo(
+    () => Array.from(new Set(claimableItems.map((i) => i.customer))).sort(),
+    [claimableItems]
+  );
 
-  const totalTons = movement.totalTons || movement.tons;
-  const totalEmissions = movement.totalEmissions || movement.tons * 0.7;
-  const claimedTons = Math.round((totalTons * percentage) / 100);
-  const claimedEmissions = Math.round(((totalEmissions * percentage) / 100) * 10) / 10;
+  const salesDocs = useMemo(() => {
+    const filtered = customerFilter === "all" ? claimableItems : claimableItems.filter((i) => i.customer === customerFilter);
+    return Array.from(new Set(filtered.map((i) => i.salesDocument))).sort();
+  }, [claimableItems, customerFilter]);
+
+  const visibleItems = useMemo(() => {
+    return claimableItems.filter((i) => {
+      if (customerFilter !== "all" && i.customer !== customerFilter) return false;
+      if (salesDocFilter !== "all" && i.salesDocument !== salesDocFilter) return false;
+      return true;
+    });
+  }, [claimableItems, customerFilter, salesDocFilter]);
+
+  const toggleItem = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const selectAllVisible = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      visibleItems.forEach((i) => next.add(i.id));
+      return next;
+    });
+  };
+  const clearVisible = () => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      visibleItems.forEach((i) => next.delete(i.id));
+      return next;
+    });
+  };
+
+  const selectedItems = claimableItems.filter((i) => selected.has(i.id));
+  const totalTons = selectedItems.reduce((s, i) => s + i.tons, 0);
+  const totalEmissions = selectedItems.reduce((s, i) => s + (i.totalEmissions ?? 0), 0);
 
   const handleSubmit = () => {
-    onInitiateClaim(
-      movement.id,
-      reportingGood,
-      percentage,
-      claimType,
-      onBehalf ? companyName : undefined,
-      claimType === "Allocated" ? emissionFactor : undefined,
-      claimType === "Allocated" ? massFactor : undefined
-    );
+    if (selected.size === 0) return;
+    onConfirm(Array.from(selected), reportingGood, onBehalf ? companyName : undefined);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-base">Create Claim</DialogTitle>
+          <DialogTitle className="text-base">Batch Claim</DialogTitle>
           <DialogDescription className="text-xs">
-            {movement.materialName} — {movement.movementId}
+            Select delivery items to claim together. One PDF will be issued for the entire batch.
           </DialogDescription>
         </DialogHeader>
         <Separator />
 
         <div className="space-y-4">
-          {/* On behalf toggle */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Customer / Climate Partner</Label>
+              <Select value={customerFilter} onValueChange={(v) => { setCustomerFilter(v); setSalesDocFilter("all"); }}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All customers</SelectItem>
+                  {customers.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Sales Document</Label>
+              <Select value={salesDocFilter} onValueChange={setSalesDocFilter}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All sales docs</SelectItem>
+                  {salesDocs.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="rounded-md border border-border">
+            <div className="flex items-center justify-between px-3 py-2 bg-muted/40 text-xs">
+              <span className="text-muted-foreground">{visibleItems.length} delivery item(s) shown · {selected.size} selected</span>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={selectAllVisible}>Select all</Button>
+                <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={clearVisible}>Clear</Button>
+              </div>
+            </div>
+            <ScrollArea className="h-[220px]">
+              <div className="divide-y divide-border">
+                {visibleItems.map((item) => (
+                  <label key={item.id} className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-muted/30">
+                    <Checkbox
+                      checked={selected.has(item.id)}
+                      onCheckedChange={() => toggleItem(item.id)}
+                    />
+                    <div className="flex-1 grid grid-cols-[1fr_120px_120px_80px] gap-2 items-center text-xs">
+                      <div>
+                        <div className="font-medium">{item.customer}</div>
+                        <div className="text-muted-foreground">{item.materialName}</div>
+                      </div>
+                      <div className="font-mono">{item.salesDocument}</div>
+                      <div className="font-mono">{item.deliveryNumber}</div>
+                      <div className="text-right font-medium">{item.tons.toLocaleString()} t</div>
+                    </div>
+                  </label>
+                ))}
+                {visibleItems.length === 0 && (
+                  <div className="px-3 py-8 text-center text-xs text-muted-foreground">No claimable delivery items match the filters.</div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Reporting good</Label>
+              <Select value={reportingGood} onValueChange={(v) => setReportingGood(v as ReportingGood)}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Fertilizers">Fertilizers</SelectItem>
+                  <SelectItem value="Energy">Energy</SelectItem>
+                  <SelectItem value="Industrials">Industrials</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="rounded-md border border-border bg-muted/20 p-2 text-xs flex flex-col justify-center">
+              <div className="flex justify-between"><span className="text-muted-foreground">Total tons:</span><span className="font-semibold">{totalTons.toLocaleString()} t</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Total emissions:</span><span className="font-semibold">{totalEmissions.toLocaleString()} tCO₂e</span></div>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between">
-            <Label className="text-sm">I'm claiming on behalf of another company</Label>
+            <Label className="text-sm">Claim on behalf of another company</Label>
             <Switch checked={onBehalf} onCheckedChange={setOnBehalf} />
           </div>
           {onBehalf && (
-            <div>
-              <Label className="text-xs text-muted-foreground">Company name</Label>
-              <Input
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="e.g. Wheat Farm Poland"
-                className="mt-1"
-              />
-            </div>
-          )}
-
-          {/* Reporting good */}
-          <div>
-            <Label className="text-xs text-muted-foreground">Reporting good</Label>
-            <Select value={reportingGood} onValueChange={(v) => setReportingGood(v as ReportingGood)}>
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Fertilizers">Fertilizers</SelectItem>
-                <SelectItem value="Energy">Energy</SelectItem>
-                <SelectItem value="Industrials">Industrials</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Amount of verified goods */}
-          <div>
-            <Label className="text-xs text-muted-foreground">Amount of verified goods</Label>
-            <div className="flex items-center gap-2 mt-1">
-              <Input
-                type="number"
-                value={claimedTons}
-                readOnly
-                className="flex-1"
-              />
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                Out of {totalTons.toLocaleString()} Tons
-              </span>
-            </div>
-          </div>
-
-          {/* Associated emissions */}
-          <div>
-            <Label className="text-xs text-muted-foreground">Associated emissions</Label>
-            <div className="flex items-center gap-2 mt-1">
-              <Input
-                type="number"
-                value={claimedEmissions}
-                readOnly
-                className="flex-1"
-              />
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                Out of {totalEmissions.toLocaleString()} tCO₂e
-              </span>
-            </div>
-          </div>
-
-          {/* Slider */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <Label className="text-xs text-muted-foreground">Claim percentage</Label>
-              <span className="text-sm font-medium text-foreground">{percentage}%</span>
-            </div>
-            <Slider
-              value={[percentage]}
-              onValueChange={([v]) => setPercentage(v)}
-              min={1}
-              max={100}
-              step={1}
-            />
-          </div>
-
-          {/* Claim type */}
-          <div>
-            <Label className="text-xs text-muted-foreground">Claim type</Label>
-            <Select value={claimType} onValueChange={(v) => setClaimType(v as ClaimType)}>
-              <SelectTrigger className="mt-1">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Proportional">Proportional</SelectItem>
-                <SelectItem value="Allocated">Allocated (co-claiming)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Allocated fields */}
-          {claimType === "Allocated" && (
-            <div className="rounded-md border border-border bg-muted/30 p-3 space-y-3">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <Label className="text-xs text-muted-foreground">Emission allocation factor</Label>
-                  <span className="text-xs font-medium">{emissionFactor}% of 100%</span>
-                </div>
-                <Slider
-                  value={[emissionFactor]}
-                  onValueChange={([v]) => setEmissionFactor(v)}
-                  min={1}
-                  max={100}
-                  step={1}
-                />
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <Label className="text-xs text-muted-foreground">Mass balance factor</Label>
-                  <span className="text-xs font-medium">{massFactor}% of 100%</span>
-                </div>
-                <Slider
-                  value={[massFactor]}
-                  onValueChange={([v]) => setMassFactor(v)}
-                  min={1}
-                  max={100}
-                  step={1}
-                />
-              </div>
-            </div>
+            <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company name" />
           )}
         </div>
 
         <DialogFooter className="mt-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSubmit}>Initiate Claim</Button>
+          <Button onClick={handleSubmit} disabled={selected.size === 0}>
+            Initiate Batch Claim ({selected.size})
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

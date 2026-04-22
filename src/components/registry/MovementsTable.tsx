@@ -1,15 +1,19 @@
-import { Award, FileDown, Eye, Link2 } from "lucide-react";
+import { Award, FileDown, Eye, ChevronDown, ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Movement } from "@/data/registryData";
-import { getMovementStatusLabel, hasBatchCoClaim } from "@/lib/coClaiming";
-import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DeliveryItem } from "@/data/registryData";
 
-interface MovementsTableProps {
-  movements: Movement[];
-  onViewDetails: (movement: Movement) => void;
-  onClaim: (movement: Movement) => void;
+interface Props {
+  items: DeliveryItem[];
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string) => void;
+  onToggleSelectGroup: (ids: string[], shouldSelect: boolean) => void;
+  onViewDetails: (item: DeliveryItem) => void;
+  onClaimGroup: (ids: string[]) => void;
+  onOpenBatchClaim: () => void;
   onExportCSV: () => void;
 }
 
@@ -18,8 +22,6 @@ function StatusBadge({ status }: { status: string }) {
     Issued: "bg-primary/10 text-primary border-primary/20",
     Booked: "bg-status-booked/10 text-status-booked-foreground border-status-booked/20",
     Claimed: "bg-status-claimed/10 text-status-claimed-foreground border-status-claimed/20",
-    "Co-claimed": "bg-status-coclaimed/10 text-status-coclaimed-foreground border-status-coclaimed/20",
-    "Batch co-claimed": "bg-status-coclaimed/10 text-status-coclaimed-foreground border-status-coclaimed/20",
   };
   return (
     <Badge variant="outline" className={`text-xs font-medium ${styles[status] || ""}`}>
@@ -28,27 +30,71 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function BatchCoClaimBadge() {
-  return (
-    <Badge
-      variant="outline"
-      className="text-[10px] font-medium bg-status-coclaimed/10 text-status-coclaimed-foreground border-status-coclaimed/20"
-    >
-      Batch co-claimed
-    </Badge>
-  );
+interface Group {
+  key: string;
+  customer: string;
+  salesDocument: string;
+  items: DeliveryItem[];
+  totalTons: number;
+  status: "Booked" | "Claimed" | "Issued" | "Mixed";
+  claimBatchId?: string;
 }
 
-export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV }: MovementsTableProps) {
-  const totalTons = movements.reduce((sum, m) => sum + m.tons, 0);
-  const issuedTons = movements.filter((m) => m.status === "Issued").reduce((sum, m) => sum + m.tons, 0);
-  const bookedTons = movements.filter((m) => m.status === "Booked").reduce((sum, m) => sum + m.tons, 0);
-  const claimedTons = movements.filter((m) => m.status === "Claimed").reduce((sum, m) => sum + m.tons, 0);
+function buildGroups(items: DeliveryItem[]): Group[] {
+  const map = new Map<string, Group>();
+  for (const item of items) {
+    const key = `${item.customer}::${item.salesDocument}`;
+    const existing = map.get(key);
+    if (existing) {
+      existing.items.push(item);
+      existing.totalTons += item.tons;
+      if (existing.status !== item.status) existing.status = "Mixed";
+    } else {
+      map.set(key, {
+        key,
+        customer: item.customer,
+        salesDocument: item.salesDocument,
+        items: [item],
+        totalTons: item.tons,
+        status: item.status,
+        claimBatchId: item.claimBatchId,
+      });
+    }
+  }
+  return Array.from(map.values());
+}
+
+export function MovementsTable({
+  items,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectGroup,
+  onViewDetails,
+  onClaimGroup,
+  onOpenBatchClaim,
+  onExportCSV,
+}: Props) {
+  const groups = useMemo(() => buildGroups(items), [items]);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const toggle = (key: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+
+  const totalTons = items.reduce((s, i) => s + i.tons, 0);
+  const issuedTons = items.filter((i) => i.status === "Issued").reduce((s, i) => s + i.tons, 0);
+  const bookedTons = items.filter((i) => i.status === "Booked").reduce((s, i) => s + i.tons, 0);
+  const claimedTons = items.filter((i) => i.status === "Claimed").reduce((s, i) => s + i.tons, 0);
+
+  const selectedCount = selectedIds.size;
 
   return (
     <div>
       {/* Summary */}
-      <div className="flex items-center gap-6 mb-4 text-sm">
+      <div className="flex items-center gap-6 mb-4 text-sm flex-wrap">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">Total:</span>
           <span className="font-semibold text-foreground">{totalTons.toLocaleString()} t</span>
@@ -65,90 +111,129 @@ export function MovementsTable({ movements, onViewDetails, onClaim, onExportCSV 
           <span className="text-muted-foreground">Claimed:</span>
           <span className="font-medium text-status-claimed">{claimedTons.toLocaleString()} t</span>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          {selectedCount > 0 && (
+            <Button size="sm" onClick={onOpenBatchClaim} className="text-xs">
+              <Award className="h-3.5 w-3.5 mr-1" /> Batch claim ({selectedCount})
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={onExportCSV} className="text-xs">
             <FileDown className="h-3.5 w-3.5 mr-1" /> Export CSV
           </Button>
         </div>
       </div>
 
-      {/* Table */}
       <div className="rounded-lg border border-border bg-background">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="text-xs font-semibold">Material Name</TableHead>
+              <TableHead className="w-10"></TableHead>
+              <TableHead className="w-10"></TableHead>
+              <TableHead className="text-xs font-semibold">Customer / Climate Partner</TableHead>
+              <TableHead className="text-xs font-semibold">Sales Document</TableHead>
+              <TableHead className="text-xs font-semibold">Delivery Items</TableHead>
               <TableHead className="text-xs font-semibold">Status</TableHead>
-              <TableHead className="text-xs font-semibold">Conv. Rate</TableHead>
-              <TableHead className="text-xs font-semibold text-right">Tons</TableHead>
-              <TableHead className="text-xs font-semibold">Movement ID</TableHead>
-              <TableHead className="text-xs font-semibold">Date</TableHead>
-              <TableHead className="text-xs font-semibold">Plant / Customer</TableHead>
+              <TableHead className="text-xs font-semibold text-right">Total Tons</TableHead>
               <TableHead className="text-xs font-semibold">Reporting Good</TableHead>
+              <TableHead className="text-xs font-semibold">Claim ID</TableHead>
               <TableHead className="text-xs font-semibold text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {movements.map((m) => {
-              const relatedMovement = m.counterpartMovementId
-                ? movements.find((candidate) => candidate.movementId === m.counterpartMovementId)
-                : undefined;
+            {groups.map((g) => {
+              const isOpen = expanded.has(g.key);
+              const claimableIds = g.items.filter((i) => i.status === "Booked").map((i) => i.id);
+              const allSelected = claimableIds.length > 0 && claimableIds.every((id) => selectedIds.has(id));
+              const someSelected = claimableIds.some((id) => selectedIds.has(id));
 
               return (
-              <TableRow key={m.id} id={`movement-row-${m.movementId}`} className="hover:bg-muted/30">
-                <TableCell className="text-sm font-medium max-w-[200px] truncate">{m.materialName}</TableCell>
-                <TableCell>
-                  <div className="flex flex-col gap-1.5 items-start">
-                    <StatusBadge status={getMovementStatusLabel(m)} />
-                    {hasBatchCoClaim(m) && <BatchCoClaimBadge />}
-                    {relatedMovement && (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className={cn("h-auto p-0 text-xs text-muted-foreground", "hover:text-foreground")}
-                        onClick={() => onViewDetails(relatedMovement)}
-                      >
-                        <Link2 className="h-3 w-3" />
-                        {relatedMovement.movementId}
+                <>
+                  <TableRow key={g.key} className="hover:bg-muted/30">
+                    <TableCell>
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => toggle(g.key)}>
+                        {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </Button>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="text-sm">{m.conversionRate}%</TableCell>
-                <TableCell className="text-sm text-right font-medium">{m.tons.toLocaleString()}</TableCell>
-                <TableCell className="text-sm text-muted-foreground font-mono">{m.movementId}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{m.timestamp.split(",")[0]}</TableCell>
-                <TableCell className="text-sm">{m.plantOrCustomer}</TableCell>
-                <TableCell className="text-sm">{m.reportingGood || "—"}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs text-primary h-7 px-2"
-                      onClick={() => onViewDetails(m)}
-                    >
-                      <Eye className="h-3 w-3 mr-1" /> Details
-                    </Button>
-                    {m.status === "Booked" && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-xs text-status-claimed-foreground h-7 px-2"
-                        onClick={() => onClaim(m)}
-                      >
-                        <Award className="h-3 w-3 mr-1" /> Claim
-                      </Button>
-                    )}
-                    {m.status === "Claimed" && (
-                      <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-7 px-2">
-                        <FileDown className="h-3 w-3 mr-1" /> PDF
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            )})}
+                    </TableCell>
+                    <TableCell>
+                      {claimableIds.length > 0 && (
+                        <Checkbox
+                          checked={allSelected ? true : someSelected ? "indeterminate" : false}
+                          onCheckedChange={(v) => onToggleSelectGroup(claimableIds, v === true)}
+                          aria-label="Select sales document"
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm font-medium">{g.customer}</TableCell>
+                    <TableCell className="text-sm font-mono">{g.salesDocument}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{g.items.length} item{g.items.length > 1 ? "s" : ""}</TableCell>
+                    <TableCell>
+                      <StatusBadge status={g.status} />
+                    </TableCell>
+                    <TableCell className="text-sm text-right font-medium">{g.totalTons.toLocaleString()}</TableCell>
+                    <TableCell className="text-sm">{g.items[0].reportingGood ?? "—"}</TableCell>
+                    <TableCell className="text-xs font-mono text-muted-foreground">{g.claimBatchId ?? "—"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {claimableIds.length > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-status-claimed-foreground h-7 px-2"
+                            onClick={() => onClaimGroup(claimableIds)}
+                          >
+                            <Award className="h-3 w-3 mr-1" /> Claim all
+                          </Button>
+                        )}
+                        {g.status === "Claimed" && g.items[0].claimDocumentUrl && (
+                          <a
+                            href={g.items[0].claimDocumentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-muted-foreground inline-flex items-center px-2 h-7 hover:text-foreground"
+                          >
+                            <FileDown className="h-3 w-3 mr-1" /> Shared PDF
+                          </a>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+
+                  {isOpen &&
+                    g.items.map((item) => (
+                      <TableRow key={item.id} className="bg-muted/10 hover:bg-muted/20">
+                        <TableCell></TableCell>
+                        <TableCell>
+                          {item.status === "Booked" && (
+                            <Checkbox
+                              checked={selectedIds.has(item.id)}
+                              onCheckedChange={() => onToggleSelect(item.id)}
+                              aria-label={`Select delivery ${item.deliveryNumber}`}
+                            />
+                          )}
+                        </TableCell>
+                        <TableCell colSpan={2} className="text-xs text-muted-foreground pl-8">
+                          ↳ Delivery <span className="font-mono">{item.deliveryNumber}</span> · GI {item.actualGIDate}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground max-w-[180px] truncate">{item.materialName}</TableCell>
+                        <TableCell><StatusBadge status={item.status} /></TableCell>
+                        <TableCell className="text-sm text-right">{item.tons.toLocaleString()}</TableCell>
+                        <TableCell className="text-xs">{item.reportingGood ?? "—"}</TableCell>
+                        <TableCell className="text-xs font-mono text-muted-foreground">{item.claimBatchId ?? "—"}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-primary h-7 px-2"
+                            onClick={() => onViewDetails(item)}
+                          >
+                            <Eye className="h-3 w-3 mr-1" /> Details
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
