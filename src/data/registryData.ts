@@ -1,7 +1,5 @@
-export type MovementStatus = "Issued" | "Booked" | "Claimed";
-export type MovementType = "Issued" | "Booked" | "Claimed";
+export type DeliveryStatus = "Issued" | "Booked" | "Claimed";
 export type ReportingGood = "Industrials" | "Energy" | "Fertilizers";
-export type ClaimType = "Proportional" | "Allocated";
 
 export interface TimelineEvent {
   label: string;
@@ -11,32 +9,31 @@ export interface TimelineEvent {
   description: string;
   actor?: string;
   documentUrl?: string;
-  relatedMovementId?: string;
   tons?: number;
 }
 
-export interface Movement {
+export interface DeliveryItem {
   id: string;
   materialName: string;
-  status: MovementStatus;
-  movementType: MovementType;
-  conversionRate: number;
+  status: DeliveryStatus;
   tons: number;
-  movementId: string;
-  timestamp: string;
-  plantOrCustomer: string;
-  complianceScheme: string;
-  originPlant?: string;
-  reportingGood?: ReportingGood;
-  totalTons?: number;
   totalEmissions?: number;
-  claimedPercentage?: number;
-  claimType?: ClaimType;
-  emissionAllocationFactor?: number;
-  massBalanceFactor?: number;
+  /** Sales document number — multiple delivery items can share one */
+  salesDocument: string;
+  /** Unique delivery item number */
+  deliveryNumber: string;
+  /** Actual goods-issued date (YYYYMMDD) */
+  actualGIDate: string;
+  /** Customer (climate partner) or originating plant */
+  customer: string;
+  originPlant: string;
+  complianceScheme: string;
+  reportingGood?: ReportingGood;
   onBehalfOf?: string;
-  parentMovementId?: string;
-  counterpartMovementId?: string;
+  /** When part of a batch claim, all delivery items in the batch share the same id */
+  claimBatchId?: string;
+  /** Single PDF shared by every item in the batch claim */
+  claimDocumentUrl?: string;
   timeline: TimelineEvent[];
 }
 
@@ -52,235 +49,248 @@ export interface CarbonDatabaseEntry {
   region: string;
 }
 
-export const initialMovements: Movement[] = [
+const PEPSI = "PepsiCo Europe";
+const FRITO = "FRITO LAY TRADING COMPANY (EUROPE)";
+const NESTLE = "Nestlé UK";
+const BASF = "BASF SE";
+const CARGILL = "Cargill Germany";
+
+function tl(events: Omit<TimelineEvent, "movementId">[], movementId: string): TimelineEvent[] {
+  return events.map((e) => ({ ...e, movementId }));
+}
+
+export const initialDeliveryItems: DeliveryItem[] = [
+  // FRITO LAY — Sales doc 0901845540 (2 delivery items)
   {
-    id: "1",
-    materialName: "YaraBela Nitromag 27-0-0 (FR)",
-    status: "Issued",
-    movementType: "Issued",
-    conversionRate: 25.5,
-    tons: 1200,
-    movementId: "MOV-2024-001",
-    timestamp: "2024-12-01 09:30",
-    plantOrCustomer: "Brunsbüttel",
-    complianceScheme: "REL",
-    originPlant: "Brunsbüttel",
-    totalTons: 1200,
-    totalEmissions: 840,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-001", type: "GoodsMovement", date: "12/01/2024 09:30 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-001-issuance.pdf" , tons: 1200 },
-    ],
-  },
-  {
-    id: "2",
+    id: "DI-001",
     materialName: "YaraBela Nitromag 27-0-0 (FR)",
     status: "Booked",
-    movementType: "Booked",
-    conversionRate: 25.5,
-    tons: 800,
-    movementId: "MOV-2024-002",
-    timestamp: "2024-12-05 14:15",
-    plantOrCustomer: "PepsiCo Europe",
-    complianceScheme: "REL",
-    originPlant: "Brunsbüttel",
-    totalTons: 800,
-    totalEmissions: 560,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-002", type: "GoodsMovement", date: "12/01/2024 09:30 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-002-issuance.pdf" , tons: 800 },
-      { label: "Certificate transferred", movementId: "MOV-2024-002", type: "GoodsMovement", date: "12/05/2024 02:15 PM", description: "Booked to PepsiCo Europe", actor: "Sales Desk — A. Müller", documentUrl: "/docs/MOV-2024-002-booking.pdf" , tons: 800 },
-    ],
-  },
-  {
-    id: "3",
-    materialName: "YaraBela Nitromag 27-0-0 (FR)",
-    status: "Claimed",
-    movementType: "Claimed",
-    conversionRate: 25.5,
-    tons: 500,
-    movementId: "MOV-2024-003",
-    timestamp: "2024-12-10 11:00",
-    plantOrCustomer: "PepsiCo Europe",
-    complianceScheme: "REL",
-    originPlant: "Brunsbüttel",
-    reportingGood: "Fertilizers",
-    claimedPercentage: 100,
-    totalTons: 500,
-    totalEmissions: 350,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-003", type: "GoodsMovement", date: "11/30/2024 01:00 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-003-issuance.pdf" , tons: 500 },
-      { label: "Certificate transferred", movementId: "MOV-2024-003", type: "GoodsMovement", date: "12/05/2024 10:00 AM", description: "Booked to PepsiCo Europe", actor: "Sales Desk — A. Müller", documentUrl: "/docs/MOV-2024-003-booking.pdf" , tons: 500 },
-      { label: "Certificate retired (claimed)", movementId: "MOV-2024-003", type: "GoodsMovement", date: "12/10/2024 11:00 AM", description: "Claimed by PepsiCo Europe — Fertilizers", actor: "PepsiCo Sustainability Team", documentUrl: "/docs/MOV-2024-003-claim.pdf" , tons: 500 },
-    ],
-  },
-  {
-    id: "4",
-    materialName: "YaraBela Axan 27-0-0 (UK)",
-    status: "Issued",
-    movementType: "Issued",
-    conversionRate: 25.3,
-    tons: 2000,
-    movementId: "MOV-2024-004",
-    timestamp: "2024-11-20 08:45",
-    plantOrCustomer: "Hull",
-    complianceScheme: "REL",
-    originPlant: "Hull",
-    totalTons: 2000,
-    totalEmissions: 1400,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-004", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-004-issuance.pdf" , tons: 2000 },
-    ],
-  },
-  {
-    id: "5",
-    materialName: "YaraBela Axan 27-0-0 (UK)",
-    status: "Booked",
-    movementType: "Booked",
-    conversionRate: 25.3,
-    tons: 1500,
-    movementId: "MOV-2024-005",
-    timestamp: "2024-11-28 16:30",
-    plantOrCustomer: "Nestlé UK",
-    complianceScheme: "REL",
-    originPlant: "Hull",
-    totalTons: 1500,
-    totalEmissions: 1050,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-005", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-005-issuance.pdf" , tons: 1500 },
-      { label: "Certificate transferred", movementId: "MOV-2024-005", type: "GoodsMovement", date: "11/28/2024 04:30 PM", description: "Booked to Nestlé UK", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-005-booking.pdf" , tons: 1500 },
-    ],
-  },
-  {
-    id: "6",
-    materialName: "YaraBela Axan 27-0-0 (UK)",
-    status: "Claimed",
-    movementType: "Claimed",
-    conversionRate: 25.3,
     tons: 600,
-    movementId: "MOV-2024-006",
-    timestamp: "2024-12-02 13:20",
-    plantOrCustomer: "Nestlé UK",
-    complianceScheme: "REL",
-    originPlant: "Hull",
-    reportingGood: "Energy",
-    claimedPercentage: 75,
-    totalTons: 600,
     totalEmissions: 420,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-006", type: "GoodsMovement", date: "11/20/2024 08:45 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-006-issuance.pdf" , tons: 600 },
-      { label: "Certificate transferred", movementId: "MOV-2024-006", type: "GoodsMovement", date: "11/28/2024 04:30 PM", description: "Booked to Nestlé UK", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-006-booking.pdf" , tons: 600 },
-      { label: "Certificate retired (claimed)", movementId: "MOV-2024-006", type: "GoodsMovement", date: "12/02/2024 01:20 PM", description: "Claimed by Nestlé UK — Energy", actor: "Nestlé ESG Team", documentUrl: "/docs/MOV-2024-006-claim.pdf" , tons: 600 },
-    ],
-  },
-  {
-    id: "7",
-    materialName: "YaraBela Nitromag 27-0-0 (FR)",
-    status: "Issued",
-    movementType: "Issued",
-    conversionRate: 25.5,
-    tons: 950,
-    movementId: "MOV-2024-007",
-    timestamp: "2024-12-15 10:00",
-    plantOrCustomer: "Brunsbüttel",
-    complianceScheme: "REL",
+    salesDocument: "0901845540",
+    deliveryNumber: "0697029206",
+    actualGIDate: "20260324",
+    customer: FRITO,
     originPlant: "Brunsbüttel",
-    totalTons: 950,
-    totalEmissions: 665,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-007", type: "GoodsMovement", date: "12/15/2024 10:00 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-007-issuance.pdf" , tons: 950 },
-    ],
-  },
-  {
-    id: "8",
-    materialName: "YaraBela Axan 27-0-0 (UK)",
-    status: "Claimed",
-    movementType: "Claimed",
-    conversionRate: 25.3,
-    tons: 100,
-    movementId: "MOV-2024-008",
-    timestamp: "2024-11-15 09:10",
-    plantOrCustomer: "BASF SE",
     complianceScheme: "REL",
-    originPlant: "Hull",
-    reportingGood: "Industrials",
-    claimedPercentage: 50,
-    claimType: "Allocated",
-    emissionAllocationFactor: 50,
-    massBalanceFactor: 50,
-    parentMovementId: "MOV-2024-008",
-    counterpartMovementId: "MOV-2024-008-R1",
-    totalTons: 100,
-    totalEmissions: 70,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-008", type: "GoodsMovement", date: "11/10/2024 09:00 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-008-issuance.pdf" , tons: 100 },
-      { label: "Certificate transferred", movementId: "MOV-2024-008", type: "GoodsMovement", date: "11/13/2024 02:00 PM", description: "Booked to BASF SE", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-008-booking.pdf" , tons: 100 },
-      { label: "Batch co-claimed", movementId: "MOV-2024-008", type: "CoClaim", date: "11/15/2024 09:10 AM", description: "Co-claimed 50% of the batch with remaining booked movement MOV-2024-008-R1", actor: "BASF Sustainability", relatedMovementId: "MOV-2024-008-R1" , tons: 100 },
-      { label: "Certificate retired (claimed)", movementId: "MOV-2024-008", type: "Claim", date: "11/15/2024 09:10 AM", description: "Co-claimed as Industrials. Remaining booked batch MOV-2024-008-R1 stays available.", actor: "BASF Sustainability", documentUrl: "/docs/MOV-2024-008-claim.pdf", relatedMovementId: "MOV-2024-008-R1" , tons: 100 },
-    ],
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "03/20/2026 09:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 600 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "03/24/2026 14:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — A. Müller", tons: 600 },
+      ],
+      "0697029206"
+    ),
   },
   {
-    id: "8r",
-    materialName: "YaraBela Axan 27-0-0 (UK)",
-    status: "Booked",
-    movementType: "Booked",
-    conversionRate: 25.3,
-    tons: 100,
-    movementId: "MOV-2024-008-R1",
-    timestamp: "2024-11-15 09:10",
-    plantOrCustomer: "BASF SE",
-    complianceScheme: "REL",
-    originPlant: "Hull",
-    claimedPercentage: 50,
-    claimType: "Allocated",
-    emissionAllocationFactor: 50,
-    massBalanceFactor: 50,
-    parentMovementId: "MOV-2024-008",
-    counterpartMovementId: "MOV-2024-008",
-    totalTons: 100,
-    totalEmissions: 70,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-008-R1", type: "GoodsMovement", date: "11/10/2024 09:00 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-008-issuance.pdf" , tons: 100 },
-      { label: "Certificate transferred", movementId: "MOV-2024-008-R1", type: "GoodsMovement", date: "11/13/2024 02:00 PM", description: "Booked to BASF SE", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-008-booking.pdf" , tons: 100 },
-      { label: "Batch co-claimed", movementId: "MOV-2024-008-R1", type: "CoClaim", date: "11/15/2024 09:10 AM", description: "Remaining batch stays booked after co-claim with movement MOV-2024-008", actor: "BASF Sustainability", relatedMovementId: "MOV-2024-008" , tons: 100 },
-      { label: "Certificate retired (claimed)", movementId: "MOV-2024-008", type: "Claim", date: "11/15/2024 09:10 AM", description: "Related co-claimed movement MOV-2024-008 was retired as Industrials", actor: "BASF Sustainability", documentUrl: "/docs/MOV-2024-008-claim.pdf", relatedMovementId: "MOV-2024-008" , tons: 100 },
-    ],
-  },
-  {
-    id: "9",
+    id: "DI-002",
     materialName: "YaraBela Nitromag 27-0-0 (FR)",
     status: "Booked",
-    movementType: "Booked",
-    conversionRate: 25.5,
+    tons: 400,
+    totalEmissions: 280,
+    salesDocument: "0901845540",
+    deliveryNumber: "0697029223",
+    actualGIDate: "20260324",
+    customer: FRITO,
+    originPlant: "Brunsbüttel",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "03/20/2026 09:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 400 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "03/24/2026 14:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — A. Müller", tons: 400 },
+      ],
+      "0697029223"
+    ),
+  },
+  // FRITO LAY — Sales doc 0901846653 (2 delivery items)
+  {
+    id: "DI-003",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Booked",
+    tons: 500,
+    totalEmissions: 350,
+    salesDocument: "0901846653",
+    deliveryNumber: "0697030601",
+    actualGIDate: "20260327",
+    customer: FRITO,
+    originPlant: "Brunsbüttel",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "03/22/2026 10:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 500 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "03/27/2026 11:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — A. Müller", tons: 500 },
+      ],
+      "0697030601"
+    ),
+  },
+  {
+    id: "DI-004",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Booked",
     tons: 350,
-    movementId: "MOV-2024-009",
-    timestamp: "2024-12-18 15:45",
-    plantOrCustomer: "Cargill Germany",
-    complianceScheme: "REL",
-    originPlant: "Brunsbüttel",
-    totalTons: 350,
     totalEmissions: 245,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-009", type: "GoodsMovement", date: "12/15/2024 10:00 AM", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", documentUrl: "/docs/MOV-2024-009-issuance.pdf" , tons: 350 },
-      { label: "Certificate transferred", movementId: "MOV-2024-009", type: "GoodsMovement", date: "12/18/2024 03:45 PM", description: "Booked to Cargill Germany", actor: "Sales Desk — A. Müller", documentUrl: "/docs/MOV-2024-009-booking.pdf" , tons: 350 },
-    ],
+    salesDocument: "0901846653",
+    deliveryNumber: "0697030612",
+    actualGIDate: "20260327",
+    customer: FRITO,
+    originPlant: "Brunsbüttel",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "03/22/2026 10:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 350 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "03/27/2026 11:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — A. Müller", tons: 350 },
+      ],
+      "0697030612"
+    ),
   },
+  // FRITO LAY — Sales doc 0901861584 (2 delivery items, different GI dates)
   {
-    id: "10",
+    id: "DI-005",
     materialName: "YaraBela Axan 27-0-0 (UK)",
     status: "Booked",
-    movementType: "Booked",
-    conversionRate: 25.3,
     tons: 720,
-    movementId: "MOV-2024-010",
-    timestamp: "2024-12-20 11:30",
-    plantOrCustomer: "ABF Ingredients",
-    complianceScheme: "REL",
-    originPlant: "Hull",
-    totalTons: 720,
     totalEmissions: 504,
-    timeline: [
-      { label: "Certificate issued", movementId: "MOV-2024-010", type: "GoodsMovement", date: "12/15/2024 08:00 AM", description: "Issued at Hull", actor: "Plant Operator (Hull)", documentUrl: "/docs/MOV-2024-010-issuance.pdf" , tons: 720 },
-      { label: "Certificate transferred", movementId: "MOV-2024-010", type: "GoodsMovement", date: "12/20/2024 11:30 AM", description: "Booked to ABF Ingredients", actor: "Sales Desk — J. Smith", documentUrl: "/docs/MOV-2024-010-booking.pdf" , tons: 720 },
-    ],
+    salesDocument: "0901861584",
+    deliveryNumber: "0697034438",
+    actualGIDate: "20260324",
+    customer: FRITO,
+    originPlant: "Hull",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "03/19/2026 08:00", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 720 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "03/24/2026 09:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — J. Smith", tons: 720 },
+      ],
+      "0697034438"
+    ),
+  },
+  {
+    id: "DI-006",
+    materialName: "YaraBela Axan 27-0-0 (UK)",
+    status: "Booked",
+    tons: 680,
+    totalEmissions: 476,
+    salesDocument: "0901861584",
+    deliveryNumber: "0697034446",
+    actualGIDate: "20260326",
+    customer: FRITO,
+    originPlant: "Hull",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "03/19/2026 08:00", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 680 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "03/26/2026 09:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — J. Smith", tons: 680 },
+      ],
+      "0697034446"
+    ),
+  },
+  // PepsiCo — already-claimed batch (2 items share one PDF)
+  {
+    id: "DI-007",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Claimed",
+    tons: 500,
+    totalEmissions: 350,
+    salesDocument: "0901820012",
+    deliveryNumber: "0697010001",
+    actualGIDate: "20241210",
+    customer: PEPSI,
+    originPlant: "Brunsbüttel",
+    complianceScheme: "REL",
+    reportingGood: "Fertilizers",
+    claimBatchId: "CLAIM-2024-001",
+    claimDocumentUrl: "/docs/CLAIM-2024-001.pdf",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "11/30/2024 01:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 500 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "12/05/2024 10:00", description: `Booked to ${PEPSI}`, actor: "Sales Desk — A. Müller", tons: 500 },
+        { label: "Certificate retired (claimed)", type: "Claim", date: "12/10/2024 11:00", description: "Batch claim CLAIM-2024-001 — Fertilizers (2 delivery items, shared PDF)", actor: "PepsiCo Sustainability Team", documentUrl: "/docs/CLAIM-2024-001.pdf", tons: 500 },
+      ],
+      "0697010001"
+    ),
+  },
+  {
+    id: "DI-008",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Claimed",
+    tons: 300,
+    totalEmissions: 210,
+    salesDocument: "0901820012",
+    deliveryNumber: "0697010002",
+    actualGIDate: "20241210",
+    customer: PEPSI,
+    originPlant: "Brunsbüttel",
+    complianceScheme: "REL",
+    reportingGood: "Fertilizers",
+    claimBatchId: "CLAIM-2024-001",
+    claimDocumentUrl: "/docs/CLAIM-2024-001.pdf",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "11/30/2024 01:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 300 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "12/05/2024 10:00", description: `Booked to ${PEPSI}`, actor: "Sales Desk — A. Müller", tons: 300 },
+        { label: "Certificate retired (claimed)", type: "Claim", date: "12/10/2024 11:00", description: "Batch claim CLAIM-2024-001 — Fertilizers (2 delivery items, shared PDF)", actor: "PepsiCo Sustainability Team", documentUrl: "/docs/CLAIM-2024-001.pdf", tons: 300 },
+      ],
+      "0697010002"
+    ),
+  },
+  // Nestlé UK — Booked
+  {
+    id: "DI-009",
+    materialName: "YaraBela Axan 27-0-0 (UK)",
+    status: "Booked",
+    tons: 1500,
+    totalEmissions: 1050,
+    salesDocument: "0901830045",
+    deliveryNumber: "0697020001",
+    actualGIDate: "20241128",
+    customer: NESTLE,
+    originPlant: "Hull",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "11/20/2024 08:45", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 1500 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "11/28/2024 16:30", description: `Booked to ${NESTLE}`, actor: "Sales Desk — J. Smith", tons: 1500 },
+      ],
+      "0697020001"
+    ),
+  },
+  // BASF — Issued (no customer yet)
+  {
+    id: "DI-010",
+    materialName: "YaraBela Axan 27-0-0 (UK)",
+    status: "Issued",
+    tons: 2000,
+    totalEmissions: 1400,
+    salesDocument: "0901810099",
+    deliveryNumber: "0697000123",
+    actualGIDate: "20241120",
+    customer: BASF,
+    originPlant: "Hull",
+    complianceScheme: "REL",
+    timeline: tl(
+      [{ label: "Certificate issued", type: "GoodsMovement", date: "11/20/2024 08:45", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 2000 }],
+      "0697000123"
+    ),
+  },
+  // Cargill — Booked
+  {
+    id: "DI-011",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Booked",
+    tons: 350,
+    totalEmissions: 245,
+    salesDocument: "0901850077",
+    deliveryNumber: "0697040001",
+    actualGIDate: "20241218",
+    customer: CARGILL,
+    originPlant: "Brunsbüttel",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "12/15/2024 10:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 350 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "12/18/2024 15:45", description: `Booked to ${CARGILL}`, actor: "Sales Desk — A. Müller", tons: 350 },
+      ],
+      "0697040001"
+    ),
   },
 ];
 
@@ -308,5 +318,3 @@ export const carbonDatabaseEntries: CarbonDatabaseEntry[] = [
     region: "United Kingdom",
   },
 ];
-
-
