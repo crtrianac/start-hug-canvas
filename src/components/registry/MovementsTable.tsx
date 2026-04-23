@@ -184,7 +184,7 @@ export function MovementsTable({
             <TableRow className="bg-muted/50">
               <TableHead className="w-10"></TableHead>
               <TableHead className="w-10"></TableHead>
-              <TableHead className="text-xs font-semibold">Customer / Climate Partner</TableHead>
+              <TableHead className="text-xs font-semibold">Customer / Plant</TableHead>
               <TableHead className="text-xs font-semibold">Sales Document</TableHead>
               <TableHead className="text-xs font-semibold">Actual GI Date</TableHead>
               <TableHead className="text-xs font-semibold">Country</TableHead>
