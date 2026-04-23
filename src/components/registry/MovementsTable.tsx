@@ -40,6 +40,8 @@ interface Group {
   claimBatchId?: string;
   countries: Set<string>;
   dates: Set<string>;
+  plants: Set<string>;
+  isIssued: boolean;
 }
 
 function buildGroups(items: DeliveryItem[]): Group[] {
@@ -52,7 +54,9 @@ function buildGroups(items: DeliveryItem[]): Group[] {
       existing.totalTons += item.tons;
       existing.countries.add(item.country);
       existing.dates.add(item.actualGIDate);
+      existing.plants.add(item.originPlant);
       if (existing.status !== item.status) existing.status = "Mixed";
+      if (item.status !== "Issued") existing.isIssued = false;
     } else {
       map.set(key, {
         key,
@@ -64,10 +68,18 @@ function buildGroups(items: DeliveryItem[]): Group[] {
         claimBatchId: item.claimBatchId,
         countries: new Set([item.country]),
         dates: new Set([item.actualGIDate]),
+        plants: new Set([item.originPlant]),
+        isIssued: item.status === "Issued",
       });
     }
   }
   return Array.from(map.values());
+}
+
+function formatPlants(plants: Set<string>): string {
+  const arr = Array.from(plants);
+  if (arr.length === 1) return arr[0];
+  return `${arr.length} plants`;
 }
 
 function formatDate(iso: string) {
