@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import type { DateRange } from "react-day-picker";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AIChatPlaceholder } from "@/components/registry/AIChatPlaceholder";
