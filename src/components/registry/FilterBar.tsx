@@ -1,20 +1,35 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { X, Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import type { DateRange } from "react-day-picker";
+import { cn } from "@/lib/utils";
 
 interface FilterBarProps {
   filters: {
     product: string;
     country: string;
     movementType: string;
-    timeframe: string;
+    dateRange: DateRange | undefined;
   };
-  onFilterChange: (key: string, value: string) => void;
+  onFilterChange: (key: string, value: string | DateRange | undefined) => void;
   onClearAll: () => void;
 }
 
 export function FilterBar({ filters, onFilterChange, onClearAll }: FilterBarProps) {
-  const hasFilters = Object.values(filters).some((v) => v !== "all");
+  const hasFilters =
+    filters.product !== "all" ||
+    filters.country !== "all" ||
+    filters.movementType !== "all" ||
+    !!filters.dateRange?.from;
+
+  const dateLabel = filters.dateRange?.from
+    ? filters.dateRange.to
+      ? `${format(filters.dateRange.from, "d MMM yyyy")} → ${format(filters.dateRange.to, "d MMM yyyy")}`
+      : format(filters.dateRange.from, "d MMM yyyy")
+    : "Date range";
 
   return (
     <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -55,18 +70,31 @@ export function FilterBar({ filters, onFilterChange, onClearAll }: FilterBarProp
         </SelectContent>
       </Select>
 
-
-      <Select value={filters.timeframe} onValueChange={(v) => onFilterChange("timeframe", v)}>
-        <SelectTrigger className="w-[140px] h-9 text-xs">
-          <SelectValue placeholder="Timeframe" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All time</SelectItem>
-          <SelectItem value="30d">Last 30 days</SelectItem>
-          <SelectItem value="90d">Last 90 days</SelectItem>
-          <SelectItem value="1y">Last year</SelectItem>
-        </SelectContent>
-      </Select>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "h-9 text-xs justify-start font-normal",
+              !filters.dateRange?.from && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="h-3.5 w-3.5 mr-1.5" />
+            {dateLabel}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="range"
+            selected={filters.dateRange}
+            onSelect={(range) => onFilterChange("dateRange", range)}
+            numberOfMonths={2}
+            initialFocus
+            className={cn("p-3 pointer-events-auto")}
+          />
+        </PopoverContent>
+      </Popover>
 
       {hasFilters && (
         <Button variant="ghost" size="sm" onClick={onClearAll} className="text-xs text-muted-foreground">
