@@ -1,4 +1,4 @@
-import { Award, FileDown, Eye, ChevronDown, ChevronRight } from "lucide-react";
+import { Award, FileDown, Eye, ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,8 @@ interface Group {
   claimBatchId?: string;
   countries: Set<string>;
   dates: Set<string>;
+  plants: Set<string>;
+  isIssued: boolean;
 }
 
 function buildGroups(items: DeliveryItem[]): Group[] {
@@ -52,7 +54,9 @@ function buildGroups(items: DeliveryItem[]): Group[] {
       existing.totalTons += item.tons;
       existing.countries.add(item.country);
       existing.dates.add(item.actualGIDate);
+      existing.plants.add(item.originPlant);
       if (existing.status !== item.status) existing.status = "Mixed";
+      if (item.status !== "Issued") existing.isIssued = false;
     } else {
       map.set(key, {
         key,
@@ -64,10 +68,18 @@ function buildGroups(items: DeliveryItem[]): Group[] {
         claimBatchId: item.claimBatchId,
         countries: new Set([item.country]),
         dates: new Set([item.actualGIDate]),
+        plants: new Set([item.originPlant]),
+        isIssued: item.status === "Issued",
       });
     }
   }
   return Array.from(map.values());
+}
+
+function formatPlants(plants: Set<string>): string {
+  const arr = Array.from(plants);
+  if (arr.length === 1) return arr[0];
+  return `${arr.length} plants`;
 }
 
 function formatDate(iso: string) {
@@ -109,6 +121,10 @@ export function MovementsTable({
       return next;
     });
 
+  const allExpanded = groups.length > 0 && expanded.size === groups.length;
+  const expandAll = () => setExpanded(new Set(groups.map((g) => g.key)));
+  const collapseAll = () => setExpanded(new Set());
+
   const totalTons = items.reduce((s, i) => s + i.tons, 0);
   const issuedTons = items.filter((i) => i.status === "Issued").reduce((s, i) => s + i.tons, 0);
   const bookedTons = items.filter((i) => i.status === "Booked").reduce((s, i) => s + i.tons, 0);
@@ -137,6 +153,20 @@ export function MovementsTable({
           <span className="font-medium text-status-claimed">{claimedTons.toLocaleString()} t</span>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          {groups.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={allExpanded ? collapseAll : expandAll}
+              className="text-xs"
+            >
+              {allExpanded ? (
+                <><ChevronsDownUp className="h-3.5 w-3.5 mr-1" /> Collapse all</>
+              ) : (
+                <><ChevronsUpDown className="h-3.5 w-3.5 mr-1" /> Expand all</>
+              )}
+            </Button>
+          )}
           {selectedCount > 0 && (
             <Button size="sm" onClick={onOpenBatchClaim} className="text-xs">
               <Award className="h-3.5 w-3.5 mr-1" /> Batch claim ({selectedCount})
@@ -154,7 +184,7 @@ export function MovementsTable({
             <TableRow className="bg-muted/50">
               <TableHead className="w-10"></TableHead>
               <TableHead className="w-10"></TableHead>
-              <TableHead className="text-xs font-semibold">Customer / Climate Partner</TableHead>
+              <TableHead className="text-xs font-semibold">Customer / Plant</TableHead>
               <TableHead className="text-xs font-semibold">Sales Document</TableHead>
               <TableHead className="text-xs font-semibold">Actual GI Date</TableHead>
               <TableHead className="text-xs font-semibold">Country</TableHead>
@@ -190,7 +220,16 @@ export function MovementsTable({
                         />
                       )}
                     </TableCell>
-                    <TableCell className="text-sm font-medium">{g.customer}</TableCell>
+                    <TableCell className="text-sm font-medium">
+                      {g.isIssued ? (
+                        <span>
+                          {formatPlants(g.plants)}
+                          <span className="ml-2 text-xs font-normal text-muted-foreground">(plant)</span>
+                        </span>
+                      ) : (
+                        g.customer
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm font-mono">{g.salesDocument}</TableCell>
                     <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatGroupDate(g.dates)}</TableCell>
                     <TableCell className="text-xs">{formatCountries(g.countries)}</TableCell>
