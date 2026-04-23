@@ -9,11 +9,13 @@ import { cn } from "@/lib/utils";
 
 interface FilterBarProps {
   filters: {
+    customer: string;
     product: string;
     country: string;
     movementType: string;
     dateRange: DateRange | undefined;
   };
+  customers: string[];
   onFilterChange: (key: string, value: string | DateRange | undefined) => void;
   onClearAll: () => void;
 }
