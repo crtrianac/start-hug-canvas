@@ -121,6 +121,10 @@ export function MovementsTable({
       return next;
     });
 
+  const allExpanded = groups.length > 0 && expanded.size === groups.length;
+  const expandAll = () => setExpanded(new Set(groups.map((g) => g.key)));
+  const collapseAll = () => setExpanded(new Set());
+
   const totalTons = items.reduce((s, i) => s + i.tons, 0);
   const issuedTons = items.filter((i) => i.status === "Issued").reduce((s, i) => s + i.tons, 0);
   const bookedTons = items.filter((i) => i.status === "Booked").reduce((s, i) => s + i.tons, 0);
