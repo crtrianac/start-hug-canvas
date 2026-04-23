@@ -13,7 +13,7 @@ import { applyBatchClaim } from "@/lib/batchClaim";
 
 const defaultFilters = {
   product: "all",
-  plant: "all",
+  country: "all",
   movementType: "all",
   timeframe: "all",
 };
