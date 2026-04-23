@@ -153,6 +153,20 @@ export function MovementsTable({
           <span className="font-medium text-status-claimed">{claimedTons.toLocaleString()} t</span>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          {groups.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={allExpanded ? collapseAll : expandAll}
+              className="text-xs"
+            >
+              {allExpanded ? (
+                <><ChevronsDownUp className="h-3.5 w-3.5 mr-1" /> Collapse all</>
+              ) : (
+                <><ChevronsUpDown className="h-3.5 w-3.5 mr-1" /> Expand all</>
+              )}
+            </Button>
+          )}
           {selectedCount > 0 && (
             <Button size="sm" onClick={onOpenBatchClaim} className="text-xs">
               <Award className="h-3.5 w-3.5 mr-1" /> Batch claim ({selectedCount})
