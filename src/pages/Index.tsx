@@ -16,7 +16,7 @@ const defaultFilters = {
   product: "all",
   country: "all",
   movementType: "all",
-  timeframe: "all",
+  dateRange: undefined as DateRange | undefined,
 };
 
 export default function Index() {
@@ -28,19 +28,27 @@ export default function Index() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [initialClaimSelection, setInitialClaimSelection] = useState<string[]>([]);
 
-  const handleFilterChange = useCallback((key: string, value: string) => {
+  const handleFilterChange = useCallback((key: string, value: string | DateRange | undefined) => {
     setFilters((f) => ({ ...f, [key]: value }));
   }, []);
 
-  const filteredItems = items.filter((m) => {
+  const filteredItems = useMemo(() => items.filter((m) => {
     if (filters.product !== "all") {
       if (filters.product === "nitromag" && !m.materialName.includes("Nitromag")) return false;
       if (filters.product === "axan" && !m.materialName.includes("Axan")) return false;
     }
     if (filters.movementType !== "all" && m.status !== filters.movementType) return false;
     if (filters.country !== "all" && m.country !== filters.country) return false;
+    if (filters.dateRange?.from) {
+      const d = new Date(m.actualGIDate);
+      const from = new Date(filters.dateRange.from);
+      from.setHours(0, 0, 0, 0);
+      const to = filters.dateRange.to ? new Date(filters.dateRange.to) : from;
+      to.setHours(23, 59, 59, 999);
+      if (d < from || d > to) return false;
+    }
     return true;
-  });
+  }), [items, filters]);
 
   const handleViewDetails = useCallback((item: DeliveryItem) => {
     setDetailItem(item);
