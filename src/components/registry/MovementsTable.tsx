@@ -15,6 +15,8 @@ interface Props {
   onClaimGroup: (ids: string[]) => void;
   onOpenBatchClaim: () => void;
   onExportCSV: () => void;
+  filteredClaimableIds: string[];
+  onClaimAllFiltered: () => void;
 }
 
 function StatusBadge({ status }: { status: string }) {
