@@ -131,6 +131,7 @@ export default function Index() {
           <AIChatPlaceholder />
           <FilterBar
             filters={filters}
+            customers={customers}
             onFilterChange={handleFilterChange}
             onClearAll={() => setFilters(defaultFilters)}
           />
@@ -143,6 +144,8 @@ export default function Index() {
             onClaimGroup={claimGroup}
             onOpenBatchClaim={openBatchClaim}
             onExportCSV={handleExportCSV}
+            filteredClaimableIds={filteredClaimableIds}
+            onClaimAllFiltered={() => claimGroup(filteredClaimableIds)}
           />
         </TabsContent>
 
