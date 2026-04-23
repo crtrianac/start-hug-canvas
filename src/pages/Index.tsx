@@ -88,9 +88,9 @@ export default function Index() {
   );
 
   const handleExportCSV = useCallback(() => {
-    const headers = ["Customer", "Sales Document", "Delivery Number", "Actual GI Date", "Material", "Status", "Tons", "Reporting Good", "Claim Batch ID"];
+    const headers = ["Customer", "Sales Document", "Delivery Number", "Actual GI Date", "Country", "Delivery Address", "Material", "Status", "Tons", "Reporting Good", "Claim Batch ID"];
     const rows = filteredItems.map((m) => [
-      m.customer, m.salesDocument, m.deliveryNumber, m.actualGIDate,
+      m.customer, m.salesDocument, m.deliveryNumber, m.actualGIDate, m.country, m.deliveryAddress,
       m.materialName, m.status, m.tons, m.reportingGood ?? "", m.claimBatchId ?? "",
     ]);
     const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
