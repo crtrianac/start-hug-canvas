@@ -106,7 +106,7 @@ export function CreateClaimDialog({ open, onOpenChange, claimableItems, initialS
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs text-muted-foreground">Customer / Climate Partner</Label>
-              <Select value={customerFilter} onValueChange={(v) => { setCustomerFilter(v); setSalesDocFilter("all"); }}>
+              <Select value={customerFilter} onValueChange={(v) => { setCustomerFilter(v); setCountryFilter("all"); }}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All customers</SelectItem>
@@ -115,12 +115,12 @@ export function CreateClaimDialog({ open, onOpenChange, claimableItems, initialS
               </Select>
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Sales Document</Label>
-              <Select value={salesDocFilter} onValueChange={setSalesDocFilter}>
+              <Label className="text-xs text-muted-foreground">Delivery country</Label>
+              <Select value={countryFilter} onValueChange={setCountryFilter}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All sales docs</SelectItem>
-                  {salesDocs.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
+                  <SelectItem value="all">All countries</SelectItem>
+                  {countries.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
