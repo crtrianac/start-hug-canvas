@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { applyBatchClaim } from "@/lib/batchClaim";
 
 const defaultFilters = {
+  customer: "all",
   product: "all",
   country: "all",
   movementType: "all",
