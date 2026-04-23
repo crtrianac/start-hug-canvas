@@ -171,6 +171,16 @@ export function MovementsTable({
               )}
             </Button>
           )}
+          {filteredClaimableIds.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onClaimAllFiltered}
+              className="text-xs border-status-claimed/40 text-status-claimed-foreground hover:bg-status-claimed/10"
+            >
+              <Award className="h-3.5 w-3.5 mr-1" /> Claim all filtered ({filteredClaimableIds.length})
+            </Button>
+          )}
           {selectedCount > 0 && (
             <Button size="sm" onClick={onOpenBatchClaim} className="text-xs">
               <Award className="h-3.5 w-3.5 mr-1" /> Batch claim ({selectedCount})
