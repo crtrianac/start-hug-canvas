@@ -37,10 +37,7 @@ export default function Index() {
       if (filters.product === "axan" && !m.materialName.includes("Axan")) return false;
     }
     if (filters.movementType !== "all" && m.status !== filters.movementType) return false;
-    if (filters.plant !== "all") {
-      if (filters.plant === "brunsbuttel" && m.originPlant !== "Brunsbüttel") return false;
-      if (filters.plant === "hull" && m.originPlant !== "Hull") return false;
-    }
+    if (filters.country !== "all" && m.country !== filters.country) return false;
     return true;
   });
 
