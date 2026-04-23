@@ -20,8 +20,9 @@ interface FilterBarProps {
   onClearAll: () => void;
 }
 
-export function FilterBar({ filters, onFilterChange, onClearAll }: FilterBarProps) {
+export function FilterBar({ filters, customers, onFilterChange, onClearAll }: FilterBarProps) {
   const hasFilters =
+    filters.customer !== "all" ||
     filters.product !== "all" ||
     filters.country !== "all" ||
     filters.movementType !== "all" ||
