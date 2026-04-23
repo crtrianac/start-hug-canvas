@@ -9,17 +9,20 @@ import { cn } from "@/lib/utils";
 
 interface FilterBarProps {
   filters: {
+    customer: string;
     product: string;
     country: string;
     movementType: string;
     dateRange: DateRange | undefined;
   };
+  customers: string[];
   onFilterChange: (key: string, value: string | DateRange | undefined) => void;
   onClearAll: () => void;
 }
 
-export function FilterBar({ filters, onFilterChange, onClearAll }: FilterBarProps) {
+export function FilterBar({ filters, customers, onFilterChange, onClearAll }: FilterBarProps) {
   const hasFilters =
+    filters.customer !== "all" ||
     filters.product !== "all" ||
     filters.country !== "all" ||
     filters.movementType !== "all" ||
@@ -33,6 +36,18 @@ export function FilterBar({ filters, onFilterChange, onClearAll }: FilterBarProp
 
   return (
     <div className="flex flex-wrap items-center gap-2 mb-4">
+      <Select value={filters.customer} onValueChange={(v) => onFilterChange("customer", v)}>
+        <SelectTrigger className="w-[220px] h-9 text-xs">
+          <SelectValue placeholder="Customer" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All customers</SelectItem>
+          {customers.map((c) => (
+            <SelectItem key={c} value={c}>{c}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
       <Select value={filters.product} onValueChange={(v) => onFilterChange("product", v)}>
         <SelectTrigger className="w-[180px] h-9 text-xs">
           <SelectValue placeholder="Finish product" />

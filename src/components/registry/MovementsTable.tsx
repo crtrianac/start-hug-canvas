@@ -15,6 +15,8 @@ interface Props {
   onClaimGroup: (ids: string[]) => void;
   onOpenBatchClaim: () => void;
   onExportCSV: () => void;
+  filteredClaimableIds: string[];
+  onClaimAllFiltered: () => void;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -110,6 +112,8 @@ export function MovementsTable({
   onClaimGroup,
   onOpenBatchClaim,
   onExportCSV,
+  filteredClaimableIds,
+  onClaimAllFiltered,
 }: Props) {
   const groups = useMemo(() => buildGroups(items), [items]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -165,6 +169,16 @@ export function MovementsTable({
               ) : (
                 <><ChevronsUpDown className="h-3.5 w-3.5 mr-1" /> Expand all</>
               )}
+            </Button>
+          )}
+          {filteredClaimableIds.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onClaimAllFiltered}
+              className="text-xs border-status-claimed/40 text-status-claimed-foreground hover:bg-status-claimed/10"
+            >
+              <Award className="h-3.5 w-3.5 mr-1" /> Claim all filtered ({filteredClaimableIds.length})
             </Button>
           )}
           {selectedCount > 0 && (

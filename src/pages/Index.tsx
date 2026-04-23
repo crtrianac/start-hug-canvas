@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { applyBatchClaim } from "@/lib/batchClaim";
 
 const defaultFilters = {
+  customer: "all",
   product: "all",
   country: "all",
   movementType: "all",
@@ -32,7 +33,13 @@ export default function Index() {
     setFilters((f) => ({ ...f, [key]: value }));
   }, []);
 
+  const customers = useMemo(
+    () => Array.from(new Set(items.filter((i) => i.status !== "Issued").map((i) => i.customer))).sort(),
+    [items]
+  );
+
   const filteredItems = useMemo(() => items.filter((m) => {
+    if (filters.customer !== "all" && m.customer !== filters.customer) return false;
     if (filters.product !== "all") {
       if (filters.product === "nitromag" && !m.materialName.includes("Nitromag")) return false;
       if (filters.product === "axan" && !m.materialName.includes("Axan")) return false;
@@ -49,6 +56,11 @@ export default function Index() {
     }
     return true;
   }), [items, filters]);
+
+  const filteredClaimableIds = useMemo(
+    () => filteredItems.filter((i) => i.status === "Booked").map((i) => i.id),
+    [filteredItems]
+  );
 
   const handleViewDetails = useCallback((item: DeliveryItem) => {
     setDetailItem(item);
@@ -119,6 +131,7 @@ export default function Index() {
           <AIChatPlaceholder />
           <FilterBar
             filters={filters}
+            customers={customers}
             onFilterChange={handleFilterChange}
             onClearAll={() => setFilters(defaultFilters)}
           />
@@ -131,6 +144,8 @@ export default function Index() {
             onClaimGroup={claimGroup}
             onOpenBatchClaim={openBatchClaim}
             onExportCSV={handleExportCSV}
+            filteredClaimableIds={filteredClaimableIds}
+            onClaimAllFiltered={() => claimGroup(filteredClaimableIds)}
           />
         </TabsContent>
 
