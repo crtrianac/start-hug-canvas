@@ -220,7 +220,16 @@ export function MovementsTable({
                         />
                       )}
                     </TableCell>
-                    <TableCell className="text-sm font-medium">{g.customer}</TableCell>
+                    <TableCell className="text-sm font-medium">
+                      {g.isIssued ? (
+                        <span>
+                          {formatPlants(g.plants)}
+                          <span className="ml-2 text-xs font-normal text-muted-foreground">(plant)</span>
+                        </span>
+                      ) : (
+                        g.customer
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm font-mono">{g.salesDocument}</TableCell>
                     <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatGroupDate(g.dates)}</TableCell>
                     <TableCell className="text-xs">{formatCountries(g.countries)}</TableCell>
