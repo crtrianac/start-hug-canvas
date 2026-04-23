@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 interface FilterBarProps {
   filters: {
     product: string;
-    plant: string;
+    country: string;
     movementType: string;
     timeframe: string;
   };
@@ -29,14 +29,17 @@ export function FilterBar({ filters, onFilterChange, onClearAll }: FilterBarProp
         </SelectContent>
       </Select>
 
-      <Select value={filters.plant} onValueChange={(v) => onFilterChange("plant", v)}>
-        <SelectTrigger className="w-[150px] h-9 text-xs">
-          <SelectValue placeholder="Plant(s)" />
+      <Select value={filters.country} onValueChange={(v) => onFilterChange("country", v)}>
+        <SelectTrigger className="w-[170px] h-9 text-xs">
+          <SelectValue placeholder="Delivery country" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All plants</SelectItem>
-          <SelectItem value="brunsbuttel">Brunsbüttel</SelectItem>
-          <SelectItem value="hull">Hull</SelectItem>
+          <SelectItem value="all">All countries</SelectItem>
+          <SelectItem value="France">France</SelectItem>
+          <SelectItem value="Spain">Spain</SelectItem>
+          <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+          <SelectItem value="Germany">Germany</SelectItem>
+          <SelectItem value="Netherlands">Netherlands</SelectItem>
         </SelectContent>
       </Select>
 

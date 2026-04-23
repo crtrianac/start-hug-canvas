@@ -27,7 +27,7 @@ export function CreateClaimDialog({ open, onOpenChange, claimableItems, initialS
   const [companyName, setCompanyName] = useState("");
   const [reportingGood, setReportingGood] = useState<ReportingGood>("Fertilizers");
   const [customerFilter, setCustomerFilter] = useState<string>("all");
-  const [salesDocFilter, setSalesDocFilter] = useState<string>("all");
+  const [countryFilter, setCountryFilter] = useState<string>("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export function CreateClaimDialog({ open, onOpenChange, claimableItems, initialS
       setCompanyName("");
       setReportingGood("Fertilizers");
       setCustomerFilter("all");
-      setSalesDocFilter("all");
+      setCountryFilter("all");
       setSelected(new Set(initialSelectedIds));
     }
   }, [open, initialSelectedIds]);
@@ -46,18 +46,18 @@ export function CreateClaimDialog({ open, onOpenChange, claimableItems, initialS
     [claimableItems]
   );
 
-  const salesDocs = useMemo(() => {
+  const countries = useMemo(() => {
     const filtered = customerFilter === "all" ? claimableItems : claimableItems.filter((i) => i.customer === customerFilter);
-    return Array.from(new Set(filtered.map((i) => i.salesDocument))).sort();
+    return Array.from(new Set(filtered.map((i) => i.country))).sort();
   }, [claimableItems, customerFilter]);
 
   const visibleItems = useMemo(() => {
     return claimableItems.filter((i) => {
       if (customerFilter !== "all" && i.customer !== customerFilter) return false;
-      if (salesDocFilter !== "all" && i.salesDocument !== salesDocFilter) return false;
+      if (countryFilter !== "all" && i.country !== countryFilter) return false;
       return true;
     });
-  }, [claimableItems, customerFilter, salesDocFilter]);
+  }, [claimableItems, customerFilter, countryFilter]);
 
   const toggleItem = (id: string) =>
     setSelected((prev) => {
@@ -106,7 +106,7 @@ export function CreateClaimDialog({ open, onOpenChange, claimableItems, initialS
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs text-muted-foreground">Customer / Climate Partner</Label>
-              <Select value={customerFilter} onValueChange={(v) => { setCustomerFilter(v); setSalesDocFilter("all"); }}>
+              <Select value={customerFilter} onValueChange={(v) => { setCustomerFilter(v); setCountryFilter("all"); }}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All customers</SelectItem>
@@ -115,12 +115,12 @@ export function CreateClaimDialog({ open, onOpenChange, claimableItems, initialS
               </Select>
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Sales Document</Label>
-              <Select value={salesDocFilter} onValueChange={setSalesDocFilter}>
+              <Label className="text-xs text-muted-foreground">Delivery country</Label>
+              <Select value={countryFilter} onValueChange={setCountryFilter}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All sales docs</SelectItem>
-                  {salesDocs.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}
+                  <SelectItem value="all">All countries</SelectItem>
+                  {countries.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>

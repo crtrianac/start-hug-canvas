@@ -13,7 +13,7 @@ import { applyBatchClaim } from "@/lib/batchClaim";
 
 const defaultFilters = {
   product: "all",
-  plant: "all",
+  country: "all",
   movementType: "all",
   timeframe: "all",
 };
@@ -37,10 +37,7 @@ export default function Index() {
       if (filters.product === "axan" && !m.materialName.includes("Axan")) return false;
     }
     if (filters.movementType !== "all" && m.status !== filters.movementType) return false;
-    if (filters.plant !== "all") {
-      if (filters.plant === "brunsbuttel" && m.originPlant !== "Brunsbüttel") return false;
-      if (filters.plant === "hull" && m.originPlant !== "Hull") return false;
-    }
+    if (filters.country !== "all" && m.country !== filters.country) return false;
     return true;
   });
 
@@ -88,9 +85,9 @@ export default function Index() {
   );
 
   const handleExportCSV = useCallback(() => {
-    const headers = ["Customer", "Sales Document", "Delivery Number", "Actual GI Date", "Material", "Status", "Tons", "Reporting Good", "Claim Batch ID"];
+    const headers = ["Customer", "Sales Document", "Delivery Number", "Actual GI Date", "Country", "Delivery Address", "Material", "Status", "Tons", "Reporting Good", "Claim Batch ID"];
     const rows = filteredItems.map((m) => [
-      m.customer, m.salesDocument, m.deliveryNumber, m.actualGIDate,
+      m.customer, m.salesDocument, m.deliveryNumber, m.actualGIDate, m.country, m.deliveryAddress,
       m.materialName, m.status, m.tons, m.reportingGood ?? "", m.claimBatchId ?? "",
     ]);
     const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");

@@ -38,6 +38,8 @@ interface Group {
   totalTons: number;
   status: "Booked" | "Claimed" | "Issued" | "Mixed";
   claimBatchId?: string;
+  countries: Set<string>;
+  dates: Set<string>;
 }
 
 function buildGroups(items: DeliveryItem[]): Group[] {
@@ -48,6 +50,8 @@ function buildGroups(items: DeliveryItem[]): Group[] {
     if (existing) {
       existing.items.push(item);
       existing.totalTons += item.tons;
+      existing.countries.add(item.country);
+      existing.dates.add(item.actualGIDate);
       if (existing.status !== item.status) existing.status = "Mixed";
     } else {
       map.set(key, {
@@ -58,10 +62,31 @@ function buildGroups(items: DeliveryItem[]): Group[] {
         totalTons: item.tons,
         status: item.status,
         claimBatchId: item.claimBatchId,
+        countries: new Set([item.country]),
+        dates: new Set([item.actualGIDate]),
       });
     }
   }
   return Array.from(map.values());
+}
+
+function formatDate(iso: string) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function formatGroupDate(dates: Set<string>): string {
+  const sorted = Array.from(dates).sort();
+  if (sorted.length === 1) return formatDate(sorted[0]);
+  return `${formatDate(sorted[0])} → ${formatDate(sorted[sorted.length - 1])}`;
+}
+
+function formatCountries(countries: Set<string>): string {
+  const arr = Array.from(countries);
+  if (arr.length === 1) return arr[0];
+  if (arr.length === 2) return arr.join(", ");
+  return `${arr.length} countries`;
 }
 
 export function MovementsTable({
@@ -131,6 +156,8 @@ export function MovementsTable({
               <TableHead className="w-10"></TableHead>
               <TableHead className="text-xs font-semibold">Customer / Climate Partner</TableHead>
               <TableHead className="text-xs font-semibold">Sales Document</TableHead>
+              <TableHead className="text-xs font-semibold">Actual GI Date</TableHead>
+              <TableHead className="text-xs font-semibold">Country</TableHead>
               <TableHead className="text-xs font-semibold">Delivery Items</TableHead>
               <TableHead className="text-xs font-semibold">Status</TableHead>
               <TableHead className="text-xs font-semibold text-right">Total Tons</TableHead>
@@ -165,6 +192,8 @@ export function MovementsTable({
                     </TableCell>
                     <TableCell className="text-sm font-medium">{g.customer}</TableCell>
                     <TableCell className="text-sm font-mono">{g.salesDocument}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatGroupDate(g.dates)}</TableCell>
+                    <TableCell className="text-xs">{formatCountries(g.countries)}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">{g.items.length} item{g.items.length > 1 ? "s" : ""}</TableCell>
                     <TableCell>
                       <StatusBadge status={g.status} />
@@ -212,8 +241,10 @@ export function MovementsTable({
                           )}
                         </TableCell>
                         <TableCell colSpan={2} className="text-xs text-muted-foreground pl-8">
-                          ↳ Delivery <span className="font-mono">{item.deliveryNumber}</span> · GI {item.actualGIDate}
+                          ↳ Delivery <span className="font-mono">{item.deliveryNumber}</span>
                         </TableCell>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDate(item.actualGIDate)}</TableCell>
+                        <TableCell className="text-xs">{item.country}</TableCell>
                         <TableCell className="text-xs text-muted-foreground max-w-[180px] truncate">{item.materialName}</TableCell>
                         <TableCell><StatusBadge status={item.status} /></TableCell>
                         <TableCell className="text-sm text-right">{item.tons.toLocaleString()}</TableCell>

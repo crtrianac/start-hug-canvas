@@ -26,6 +26,13 @@ const dotColor: Record<string, string> = {
   "Certificate retired (claimed)": "border-status-claimed",
 };
 
+function formatDate(iso: string) {
+  // Accepts "yyyy-mm-dd" or "yyyy-mm-dd HH:MM"
+  const d = new Date(iso.replace(" ", "T"));
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 function Timeline({ events }: { events: DeliveryItem["timeline"] }) {
   return (
     <div className="relative pl-5 space-y-6 mt-4">
@@ -77,12 +84,17 @@ export function MovementDetailDialog({ item, open, onOpenChange }: Props) {
           <Row label="Status" value={<Badge variant="outline" className="text-xs">{item.status}</Badge>} />
           <Row label="Sales Document" value={<span className="font-mono">{item.salesDocument}</span>} />
           <Row label="Delivery Number" value={<span className="font-mono">{item.deliveryNumber}</span>} />
-          <Row label="Actual GI Date" value={item.actualGIDate} />
+          <Row label="Actual GI Date" value={formatDate(item.actualGIDate)} />
           <Row label="Tons" value={`${item.tons.toLocaleString()} t`} />
           {item.totalEmissions !== undefined && (
             <Row label="Emissions" value={`${item.totalEmissions.toLocaleString()} tCO₂e`} />
           )}
           <Row label="Customer / Climate Partner" value={item.customer} />
+          <Row label="Delivery Country" value={item.country} />
+          <Row
+            label="Delivery Address"
+            value={<span className="text-right text-xs leading-snug max-w-[240px] inline-block">{item.deliveryAddress}</span>}
+          />
           <Row label="Origin Plant" value={item.originPlant} />
           <Row label="Compliance Scheme" value={item.complianceScheme} />
           {item.reportingGood && <Row label="Reporting Good" value={item.reportingGood} />}
