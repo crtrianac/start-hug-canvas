@@ -36,6 +36,18 @@ export function FilterBar({ filters, customers, onFilterChange, onClearAll }: Fi
 
   return (
     <div className="flex flex-wrap items-center gap-2 mb-4">
+      <Select value={filters.customer} onValueChange={(v) => onFilterChange("customer", v)}>
+        <SelectTrigger className="w-[220px] h-9 text-xs">
+          <SelectValue placeholder="Customer" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All customers</SelectItem>
+          {customers.map((c) => (
+            <SelectItem key={c} value={c}>{c}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
       <Select value={filters.product} onValueChange={(v) => onFilterChange("product", v)}>
         <SelectTrigger className="w-[180px] h-9 text-xs">
           <SelectValue placeholder="Finish product" />
