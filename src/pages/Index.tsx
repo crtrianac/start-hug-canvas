@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import type { DateRange } from "react-day-picker";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { AIChatPlaceholder } from "@/components/registry/AIChatPlaceholder";
+
 import { FilterBar } from "@/components/registry/FilterBar";
 import { MovementsTable } from "@/components/registry/MovementsTable";
 import { MovementDetailDialog } from "@/components/registry/MovementDetailDialog";
@@ -142,7 +142,6 @@ export default function Index() {
     <AppLayout>
       <Tabs defaultValue="registry" className="w-full">
         <TabsContent value="registry" className="space-y-0">
-          <AIChatPlaceholder />
           <FilterBar
             filters={filters}
             customers={customers}
