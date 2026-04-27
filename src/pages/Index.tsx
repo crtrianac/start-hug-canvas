@@ -3,7 +3,7 @@ import type { DateRange } from "react-day-picker";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AppLayout } from "@/components/layout/AppLayout";
 
-import { FilterBar } from "@/components/registry/FilterBar";
+import { FilterBar, type Filters } from "@/components/registry/FilterBar";
 import { MovementsTable } from "@/components/registry/MovementsTable";
 import { MovementDetailDialog } from "@/components/registry/MovementDetailDialog";
 import { CreateClaimDialog } from "@/components/registry/CreateClaimDialog";
@@ -12,26 +12,29 @@ import { initialDeliveryItems, DeliveryItem, ReportingGood } from "@/data/regist
 import { toast } from "@/hooks/use-toast";
 import { applyBatchClaim } from "@/lib/batchClaim";
 
-const defaultFilters = {
-  customer: "all",
-  product: "all",
-  country: "all",
-  movementType: "all",
-  dateRange: undefined as DateRange | undefined,
+const defaultFilters: Filters = {
+  customers: [],
+  products: [],
+  countries: [],
+  movementTypes: [],
+  dateRange: undefined,
 };
 
 export default function Index() {
   const [items, setItems] = useState<DeliveryItem[]>(initialDeliveryItems);
-  const [filters, setFilters] = useState(defaultFilters);
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [detailItem, setDetailItem] = useState<DeliveryItem | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   
 
-  const handleFilterChange = useCallback((key: string, value: string | DateRange | undefined) => {
-    setFilters((f) => ({ ...f, [key]: value }));
-  }, []);
+  const handleFilterChange = useCallback(
+    <K extends keyof Filters>(key: K, value: Filters[K]) => {
+      setFilters((f) => ({ ...f, [key]: value }));
+    },
+    []
+  );
 
   const customers = useMemo(
     () => Array.from(new Set(items.filter((i) => i.status !== "Issued").map((i) => i.customer))).sort(),
@@ -44,17 +47,21 @@ export default function Index() {
   );
 
   const filteredItems = useMemo(() => items.filter((m) => {
-    if (filters.customer !== "all") {
-      if (filters.customer.startsWith("plant:")) {
-        if (m.originPlant !== filters.customer.slice(6)) return false;
-      } else if (m.customer !== filters.customer) return false;
+    if (filters.customers.length > 0) {
+      const match = filters.customers.some((v) =>
+        v.startsWith("plant:") ? m.originPlant === v.slice(6) : m.customer === v
+      );
+      if (!match) return false;
     }
-    if (filters.product !== "all") {
-      if (filters.product === "nitromag" && !m.materialName.includes("Nitromag")) return false;
-      if (filters.product === "axan" && !m.materialName.includes("Axan")) return false;
+    if (filters.products.length > 0) {
+      const match = filters.products.some((p) =>
+        p === "nitromag" ? m.materialName.includes("Nitromag") :
+        p === "axan" ? m.materialName.includes("Axan") : false
+      );
+      if (!match) return false;
     }
-    if (filters.movementType !== "all" && m.status !== filters.movementType) return false;
-    if (filters.country !== "all" && m.country !== filters.country) return false;
+    if (filters.movementTypes.length > 0 && !filters.movementTypes.includes(m.status)) return false;
+    if (filters.countries.length > 0 && !filters.countries.includes(m.country)) return false;
     if (filters.dateRange?.from) {
       const d = new Date(m.actualGIDate);
       const from = new Date(filters.dateRange.from);
