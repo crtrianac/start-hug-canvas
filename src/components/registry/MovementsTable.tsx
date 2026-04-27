@@ -192,7 +192,22 @@ export function MovementsTable({
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="w-10"></TableHead>
-              <TableHead className="w-10"></TableHead>
+              <TableHead className="w-10">
+                {filteredClaimableIds.length > 0 && (
+                  <Checkbox
+                    checked={
+                      selectedCount === 0
+                        ? false
+                        : filteredClaimableIds.every((id) => selectedIds.has(id)) &&
+                          selectedCount === filteredClaimableIds.length
+                        ? true
+                        : "indeterminate"
+                    }
+                    onCheckedChange={(v) => (v === true ? onSelectAllFiltered() : onClearSelection())}
+                    aria-label="Select all filtered"
+                  />
+                )}
+              </TableHead>
               <TableHead className="text-xs font-semibold">Customer / Plant</TableHead>
               <TableHead className="text-xs font-semibold">Sales Document</TableHead>
               <TableHead className="text-xs font-semibold">Actual GI Date</TableHead>
