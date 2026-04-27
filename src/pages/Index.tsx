@@ -83,26 +83,28 @@ export default function Index() {
     });
   }, []);
 
-  const openBatchClaim = useCallback(() => {
-    setInitialClaimSelection(Array.from(selectedIds));
+  const selectAllFiltered = useCallback(() => {
+    setSelectedIds(new Set(filteredClaimableIds));
+  }, [filteredClaimableIds]);
+
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+
+  const openClaimConfirm = useCallback(() => {
+    if (selectedIds.size === 0) return;
     setClaimOpen(true);
   }, [selectedIds]);
 
-  const claimGroup = useCallback((ids: string[]) => {
-    setInitialClaimSelection(ids);
-    setClaimOpen(true);
-  }, []);
-
   const handleConfirmClaim = useCallback(
-    (selectedDeliveryIds: string[], reportingGood: ReportingGood, onBehalfOf?: string) => {
-      setItems((prev) => applyBatchClaim(prev, { deliveryItemIds: selectedDeliveryIds, reportingGood, onBehalfOf }));
+    (reportingGood: ReportingGood, onBehalfOf?: string) => {
+      const ids = Array.from(selectedIds);
+      setItems((prev) => applyBatchClaim(prev, { deliveryItemIds: ids, reportingGood, onBehalfOf }));
       setSelectedIds(new Set());
       toast({
         title: "Batch claim initiated",
-        description: `${selectedDeliveryIds.length} delivery item(s) claimed as ${reportingGood}. One shared PDF generated.`,
+        description: `${ids.length} delivery item(s) claimed as ${reportingGood}. One shared PDF generated.`,
       });
     },
-    []
+    [selectedIds]
   );
 
   const handleExportCSV = useCallback(() => {
@@ -122,7 +124,10 @@ export default function Index() {
     toast({ title: "CSV exported", description: "Registry delivery items exported." });
   }, [filteredItems]);
 
-  const claimableItems = items.filter((i) => i.status === "Booked");
+  const itemsToClaim = useMemo(
+    () => items.filter((i) => selectedIds.has(i.id) && i.status === "Booked"),
+    [items, selectedIds]
+  );
 
   return (
     <AppLayout>
@@ -140,12 +145,12 @@ export default function Index() {
             selectedIds={selectedIds}
             onToggleSelect={toggleSelect}
             onToggleSelectGroup={toggleSelectGroup}
+            onSelectAllFiltered={selectAllFiltered}
+            onClearSelection={clearSelection}
             onViewDetails={handleViewDetails}
-            onClaimGroup={claimGroup}
-            onOpenBatchClaim={openBatchClaim}
             onExportCSV={handleExportCSV}
             filteredClaimableIds={filteredClaimableIds}
-            onClaimAllFiltered={() => claimGroup(filteredClaimableIds)}
+            onClaimAllFiltered={openClaimConfirm}
           />
         </TabsContent>
 
@@ -158,8 +163,7 @@ export default function Index() {
       <CreateClaimDialog
         open={claimOpen}
         onOpenChange={setClaimOpen}
-        claimableItems={claimableItems}
-        initialSelectedIds={initialClaimSelection}
+        itemsToClaim={itemsToClaim}
         onConfirm={handleConfirmClaim}
       />
     </AppLayout>
