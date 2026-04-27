@@ -38,14 +38,30 @@ export function FilterBar({ filters, customers, plants, onFilterChange, onClearA
   return (
     <div className="flex flex-wrap items-center gap-2 mb-4">
       <Select value={filters.customer} onValueChange={(v) => onFilterChange("customer", v)}>
-        <SelectTrigger className="w-[220px] h-9 text-xs">
-          <SelectValue placeholder="Customer" />
+        <SelectTrigger className="w-[260px] h-9 text-xs">
+          <SelectValue placeholder="Customer / Plant" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All customers</SelectItem>
-          {customers.map((c) => (
-            <SelectItem key={c} value={c}>{c}</SelectItem>
-          ))}
+          <SelectItem value="all">All customers & plants</SelectItem>
+          {customers.length > 0 && (
+            <SelectGroup>
+              <SelectLabel className="text-xs">Customers</SelectLabel>
+              {customers.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectGroup>
+          )}
+          {plants.length > 0 && (
+            <>
+              <SelectSeparator />
+              <SelectGroup>
+                <SelectLabel className="text-xs">Plants (issued, no customer yet)</SelectLabel>
+                {plants.map((p) => (
+                  <SelectItem key={p} value={`plant:${p}`}>{p}</SelectItem>
+                ))}
+              </SelectGroup>
+            </>
+          )}
         </SelectContent>
       </Select>
 
