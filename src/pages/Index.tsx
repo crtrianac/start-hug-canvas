@@ -146,6 +146,7 @@ export default function Index() {
           <FilterBar
             filters={filters}
             customers={customers}
+            plants={plants}
             onFilterChange={handleFilterChange}
             onClearAll={() => setFilters(defaultFilters)}
           />
