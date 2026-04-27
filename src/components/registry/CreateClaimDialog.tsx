@@ -21,21 +21,24 @@ interface Props {
 }
 
 export function CreateClaimDialog({ open, onOpenChange, itemsToClaim, onConfirm }: Props) {
-  const [onBehalf, setOnBehalf] = useState(false);
+  const [onBehalf, setOnBehalf] = useState(true);
   const [companyName, setCompanyName] = useState("");
   const [reportingGood, setReportingGood] = useState<ReportingGood>("Fertilizers");
 
+  const customers = Array.from(new Set(itemsToClaim.map((i) => i.customer)));
+  const singleCustomer = customers.length === 1 ? customers[0] : "";
+  const multipleCustomers = customers.length > 1;
+
   useEffect(() => {
     if (open) {
-      setOnBehalf(false);
-      setCompanyName("");
+      setOnBehalf(true);
+      setCompanyName(multipleCustomers ? "" : singleCustomer);
       setReportingGood("Fertilizers");
     }
-  }, [open]);
+  }, [open, singleCustomer, multipleCustomers]);
 
   const totalTons = itemsToClaim.reduce((s, i) => s + i.tons, 0);
   const totalEmissions = itemsToClaim.reduce((s, i) => s + (i.totalEmissions ?? 0), 0);
-  const customers = Array.from(new Set(itemsToClaim.map((i) => i.customer)));
   const countries = Array.from(new Set(itemsToClaim.map((i) => i.country)));
   const salesDocs = Array.from(new Set(itemsToClaim.map((i) => i.salesDocument)));
 
