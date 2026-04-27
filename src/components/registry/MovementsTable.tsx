@@ -11,9 +11,9 @@ interface Props {
   selectedIds: Set<string>;
   onToggleSelect: (id: string) => void;
   onToggleSelectGroup: (ids: string[], shouldSelect: boolean) => void;
+  onSelectAllFiltered: () => void;
+  onClearSelection: () => void;
   onViewDetails: (item: DeliveryItem) => void;
-  onClaimGroup: (ids: string[]) => void;
-  onOpenBatchClaim: () => void;
   onExportCSV: () => void;
   filteredClaimableIds: string[];
   onClaimAllFiltered: () => void;
@@ -108,9 +108,9 @@ export function MovementsTable({
   selectedIds,
   onToggleSelect,
   onToggleSelectGroup,
+  onSelectAllFiltered,
+  onClearSelection,
   onViewDetails,
-  onClaimGroup,
-  onOpenBatchClaim,
   onExportCSV,
   filteredClaimableIds,
   onClaimAllFiltered,
@@ -172,19 +172,29 @@ export function MovementsTable({
             </Button>
           )}
           {filteredClaimableIds.length > 0 && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onClaimAllFiltered}
-              className="text-xs border-status-claimed/40 text-status-claimed-foreground hover:bg-status-claimed/10"
-            >
-              <Award className="h-3.5 w-3.5 mr-1" /> Claim all filtered ({filteredClaimableIds.length})
-            </Button>
-          )}
-          {selectedCount > 0 && (
-            <Button size="sm" onClick={onOpenBatchClaim} className="text-xs">
-              <Award className="h-3.5 w-3.5 mr-1" /> Batch claim ({selectedCount})
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onSelectAllFiltered}
+                className="text-xs"
+              >
+                Select all ({filteredClaimableIds.length})
+              </Button>
+              {selectedCount > 0 && (
+                <Button variant="ghost" size="sm" onClick={onClearSelection} className="text-xs">
+                  Clear ({selectedCount})
+                </Button>
+              )}
+              <Button
+                size="sm"
+                onClick={onClaimAllFiltered}
+                disabled={selectedCount === 0}
+                className="text-xs"
+              >
+                <Award className="h-3.5 w-3.5 mr-1" /> Claim all filtered ({selectedCount})
+              </Button>
+            </>
           )}
           <Button variant="outline" size="sm" onClick={onExportCSV} className="text-xs">
             <FileDown className="h-3.5 w-3.5 mr-1" /> Export CSV
@@ -256,16 +266,6 @@ export function MovementsTable({
                     <TableCell className="text-xs font-mono text-muted-foreground">{g.claimBatchId ?? "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {claimableIds.length > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs text-status-claimed-foreground h-7 px-2"
-                            onClick={() => onClaimGroup(claimableIds)}
-                          >
-                            <Award className="h-3 w-3 mr-1" /> Claim all
-                          </Button>
-                        )}
                         {g.status === "Claimed" && g.items[0].claimDocumentUrl && (
                           <a
                             href={g.items[0].claimDocumentUrl}
