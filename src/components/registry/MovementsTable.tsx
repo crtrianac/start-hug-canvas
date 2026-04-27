@@ -172,29 +172,14 @@ export function MovementsTable({
             </Button>
           )}
           {filteredClaimableIds.length > 0 && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onSelectAllFiltered}
-                className="text-xs"
-              >
-                Select all ({filteredClaimableIds.length})
-              </Button>
-              {selectedCount > 0 && (
-                <Button variant="ghost" size="sm" onClick={onClearSelection} className="text-xs">
-                  Clear ({selectedCount})
-                </Button>
-              )}
-              <Button
-                size="sm"
-                onClick={onClaimAllFiltered}
-                disabled={selectedCount === 0}
-                className="text-xs"
-              >
-                <Award className="h-3.5 w-3.5 mr-1" /> Claim all filtered ({selectedCount})
-              </Button>
-            </>
+            <Button
+              size="sm"
+              onClick={onClaimAllFiltered}
+              disabled={selectedCount === 0}
+              className="text-xs"
+            >
+              <Award className="h-3.5 w-3.5 mr-1" /> Claim all filtered ({selectedCount})
+            </Button>
           )}
           <Button variant="outline" size="sm" onClick={onExportCSV} className="text-xs">
             <FileDown className="h-3.5 w-3.5 mr-1" /> Export CSV
@@ -207,7 +192,22 @@ export function MovementsTable({
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="w-10"></TableHead>
-              <TableHead className="w-10"></TableHead>
+              <TableHead className="w-10">
+                {filteredClaimableIds.length > 0 && (
+                  <Checkbox
+                    checked={
+                      selectedCount === 0
+                        ? false
+                        : filteredClaimableIds.every((id) => selectedIds.has(id)) &&
+                          selectedCount === filteredClaimableIds.length
+                        ? true
+                        : "indeterminate"
+                    }
+                    onCheckedChange={(v) => (v === true ? onSelectAllFiltered() : onClearSelection())}
+                    aria-label="Select all filtered"
+                  />
+                )}
+              </TableHead>
               <TableHead className="text-xs font-semibold">Customer / Plant</TableHead>
               <TableHead className="text-xs font-semibold">Sales Document</TableHead>
               <TableHead className="text-xs font-semibold">Actual GI Date</TableHead>
