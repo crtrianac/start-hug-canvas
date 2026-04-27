@@ -45,7 +45,7 @@ export function FilterBar({ filters, customers, plants, onFilterChange, onClearA
           <SelectItem value="all">All customers & plants</SelectItem>
           {customers.length > 0 && (
             <SelectGroup>
-              <SelectLabel className="text-xs">Customers</SelectLabel>
+              <SelectLabel className="text-xs">Customers (booked or claimed)</SelectLabel>
               {customers.map((c) => (
                 <SelectItem key={c} value={c}>{c}</SelectItem>
               ))}
