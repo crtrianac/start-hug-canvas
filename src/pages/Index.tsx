@@ -38,8 +38,17 @@ export default function Index() {
     [items]
   );
 
+  const plants = useMemo(
+    () => Array.from(new Set(items.map((i) => i.originPlant))).sort(),
+    [items]
+  );
+
   const filteredItems = useMemo(() => items.filter((m) => {
-    if (filters.customer !== "all" && m.customer !== filters.customer) return false;
+    if (filters.customer !== "all") {
+      if (filters.customer.startsWith("plant:")) {
+        if (m.originPlant !== filters.customer.slice(6)) return false;
+      } else if (m.customer !== filters.customer) return false;
+    }
     if (filters.product !== "all") {
       if (filters.product === "nitromag" && !m.materialName.includes("Nitromag")) return false;
       if (filters.product === "axan" && !m.materialName.includes("Axan")) return false;
