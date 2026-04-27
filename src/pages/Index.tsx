@@ -27,7 +27,7 @@ export default function Index() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [initialClaimSelection, setInitialClaimSelection] = useState<string[]>([]);
+  
 
   const handleFilterChange = useCallback((key: string, value: string | DateRange | undefined) => {
     setFilters((f) => ({ ...f, [key]: value }));
