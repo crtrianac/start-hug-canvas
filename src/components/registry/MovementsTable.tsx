@@ -8,12 +8,7 @@ import { DeliveryItem } from "@/data/registryData";
 
 interface Props {
   items: DeliveryItem[];
-  selectedIds: Set<string>;
-  onToggleSelect: (id: string) => void;
-  onToggleSelectGroup: (ids: string[], shouldSelect: boolean) => void;
   onViewDetails: (item: DeliveryItem) => void;
-  onClaimGroup: (ids: string[]) => void;
-  onOpenBatchClaim: () => void;
   onExportCSV: () => void;
   filteredClaimableIds: string[];
   onClaimAllFiltered: () => void;
