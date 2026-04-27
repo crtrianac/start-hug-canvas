@@ -266,16 +266,6 @@ export function MovementsTable({
                     <TableCell className="text-xs font-mono text-muted-foreground">{g.claimBatchId ?? "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {claimableIds.length > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs text-status-claimed-foreground h-7 px-2"
-                            onClick={() => onClaimGroup(claimableIds)}
-                          >
-                            <Award className="h-3 w-3 mr-1" /> Claim all
-                          </Button>
-                        )}
                         {g.status === "Claimed" && g.items[0].claimDocumentUrl && (
                           <a
                             href={g.items[0].claimDocumentUrl}
