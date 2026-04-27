@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 import { DeliveryItem, ReportingGood } from "@/data/registryData";
 
 interface Props {
@@ -19,21 +21,24 @@ interface Props {
 }
 
 export function CreateClaimDialog({ open, onOpenChange, itemsToClaim, onConfirm }: Props) {
-  const [onBehalf, setOnBehalf] = useState(false);
+  const [onBehalf, setOnBehalf] = useState(true);
   const [companyName, setCompanyName] = useState("");
   const [reportingGood, setReportingGood] = useState<ReportingGood>("Fertilizers");
 
+  const customers = Array.from(new Set(itemsToClaim.map((i) => i.customer)));
+  const singleCustomer = customers.length === 1 ? customers[0] : "";
+  const multipleCustomers = customers.length > 1;
+
   useEffect(() => {
     if (open) {
-      setOnBehalf(false);
-      setCompanyName("");
+      setOnBehalf(true);
+      setCompanyName(multipleCustomers ? "" : singleCustomer);
       setReportingGood("Fertilizers");
     }
-  }, [open]);
+  }, [open, singleCustomer, multipleCustomers]);
 
   const totalTons = itemsToClaim.reduce((s, i) => s + i.tons, 0);
   const totalEmissions = itemsToClaim.reduce((s, i) => s + (i.totalEmissions ?? 0), 0);
-  const customers = Array.from(new Set(itemsToClaim.map((i) => i.customer)));
   const countries = Array.from(new Set(itemsToClaim.map((i) => i.country)));
   const salesDocs = Array.from(new Set(itemsToClaim.map((i) => i.salesDocument)));
 
@@ -100,18 +105,36 @@ export function CreateClaimDialog({ open, onOpenChange, itemsToClaim, onConfirm 
             </Select>
           </div>
 
+          {multipleCustomers && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle className="text-sm">Multiple companies selected</AlertTitle>
+              <AlertDescription className="text-xs">
+                The selection contains {customers.length} different customers ({customers.join(", ")}).
+                Please enter manually the company you are claiming on behalf of.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex items-center justify-between">
             <Label className="text-sm">Claim on behalf of another company</Label>
             <Switch checked={onBehalf} onCheckedChange={setOnBehalf} />
           </div>
           {onBehalf && (
-            <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company name" />
+            <Input
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder={multipleCustomers ? "Enter company name" : "Company name"}
+            />
           )}
         </div>
 
         <DialogFooter className="mt-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={itemsToClaim.length === 0}>
+          <Button
+            onClick={handleSubmit}
+            disabled={itemsToClaim.length === 0 || (onBehalf && companyName.trim() === "")}
+          >
             Confirm claim ({itemsToClaim.length})
           </Button>
         </DialogFooter>
