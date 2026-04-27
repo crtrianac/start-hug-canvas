@@ -105,18 +105,36 @@ export function CreateClaimDialog({ open, onOpenChange, itemsToClaim, onConfirm 
             </Select>
           </div>
 
+          {multipleCustomers && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle className="text-sm">Multiple companies selected</AlertTitle>
+              <AlertDescription className="text-xs">
+                The selection contains {customers.length} different customers ({customers.join(", ")}).
+                Please enter manually the company you are claiming on behalf of.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex items-center justify-between">
             <Label className="text-sm">Claim on behalf of another company</Label>
             <Switch checked={onBehalf} onCheckedChange={setOnBehalf} />
           </div>
           {onBehalf && (
-            <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company name" />
+            <Input
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder={multipleCustomers ? "Enter company name" : "Company name"}
+            />
           )}
         </div>
 
         <DialogFooter className="mt-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={itemsToClaim.length === 0}>
+          <Button
+            onClick={handleSubmit}
+            disabled={itemsToClaim.length === 0 || (onBehalf && companyName.trim() === "")}
+          >
             Confirm claim ({itemsToClaim.length})
           </Button>
         </DialogFooter>
