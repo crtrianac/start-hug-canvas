@@ -105,6 +105,11 @@ function formatCountries(countries: Set<string>): string {
 
 export function MovementsTable({
   items,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectGroup,
+  onSelectAllFiltered,
+  onClearSelection,
   onViewDetails,
   onExportCSV,
   filteredClaimableIds,
@@ -128,6 +133,8 @@ export function MovementsTable({
   const issuedTons = items.filter((i) => i.status === "Issued").reduce((s, i) => s + i.tons, 0);
   const bookedTons = items.filter((i) => i.status === "Booked").reduce((s, i) => s + i.tons, 0);
   const claimedTons = items.filter((i) => i.status === "Claimed").reduce((s, i) => s + i.tons, 0);
+
+  const selectedCount = selectedIds.size;
 
   return (
     <div>
