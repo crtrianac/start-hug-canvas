@@ -16,11 +16,12 @@ interface FilterBarProps {
     dateRange: DateRange | undefined;
   };
   customers: string[];
+  plants: string[];
   onFilterChange: (key: string, value: string | DateRange | undefined) => void;
   onClearAll: () => void;
 }
 
-export function FilterBar({ filters, customers, onFilterChange, onClearAll }: FilterBarProps) {
+export function FilterBar({ filters, customers, plants, onFilterChange, onClearAll }: FilterBarProps) {
   const hasFilters =
     filters.customer !== "all" ||
     filters.product !== "all" ||
