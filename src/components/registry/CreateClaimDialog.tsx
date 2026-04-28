@@ -116,17 +116,6 @@ export function CreateClaimDialog({ open, onOpenChange, itemsToClaim, onConfirm 
             </Alert>
           )}
 
-          {countries.length > 1 && (
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle className="text-sm">Multiple countries selected</AlertTitle>
-              <AlertDescription className="text-xs">
-                The selection spans {countries.length} countries ({countries.join(", ")}).
-                Please confirm this batch claim is intended to cover deliveries across all of them.
-              </AlertDescription>
-            </Alert>
-          )}
-
           <div className="flex items-center justify-between">
             <Label className="text-sm">Claim on behalf of another company</Label>
             <Switch checked={onBehalf} onCheckedChange={setOnBehalf} />
