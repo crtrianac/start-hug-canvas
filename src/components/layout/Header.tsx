@@ -1,11 +1,9 @@
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function Header() {
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-background px-4">
       <div className="flex items-center gap-3">
-        <SidebarTrigger className="text-muted-foreground" />
         <h1 className="text-lg font-semibold text-foreground">Finish product registry</h1>
       </div>
       <div className="flex items-center gap-4">
