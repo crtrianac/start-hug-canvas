@@ -1,23 +1,23 @@
+## Goal
+Visually separate the filter row (Customer/Plant, Product, Country, Movement type, Date range) from the actions/summary row (totals + Expand all / Claim / Export CSV) so the toolbar stops feeling cluttered.
 
+## Approach
+Add a horizontal divider between the two rows. The cleanest place is at the bottom of `FilterBar` (so any page that uses it gets the separation for free).
 
-## Updated Plan: Registry Table Shows Claimed Reporting Goods
+## Changes
 
-### What changes from the previous plan
+**`src/components/registry/FilterBar.tsx`**
+- Wrap the existing flex row in a parent `<div>`.
+- Append a `<Separator />` (already imported) below the filter row, with a small top margin and a bottom margin so it sits cleanly between filters and the summary/actions row in `MovementsTable`.
+- Reduce the filter row's `mb-4` (now redundant) and let the wrapper handle spacing: e.g. filter row `mb-3`, then `<Separator className="mb-4" />`.
 
-The registry movements table gains a **"Reporting Good"** column. When a claim is completed via the Create Claim dialog, the claimed reporting good (selected from: **Industrials**, **Energy**, **Fertilizers**) appears in the corresponding row in the registry table.
+No other files need to change — `MovementsTable` already starts with its own `mb-4` summary row, which will now sit cleanly under the divider.
 
-### Specific additions
+## Visual result
+```text
+[ Customer/Plant ] [ Product ] [ Country ] [ Movement type ] [ Date range ]
+────────────────────────────────────────────────────────────────────────────
+Total: …   Issued: …   Booked: …   Claimed: …      [Expand all] [Claim] [CSV]
+```
 
-1. **Mock data (`registryData.ts`)** — Each movement record gets an optional `reportingGood` field. For movements with status "Claimed", this is pre-populated with one of the three categories (e.g., Fertilizers for PepsiCo claims, Energy for another, Industrials for a third).
-
-2. **Movements Table (`MovementsTable.tsx`)** — Add a "Reporting Good" column that displays the value when present (for claimed movements) and shows "—" for Issued/Booked movements.
-
-3. **Create Claim Dialog (`CreateClaimDialog.tsx`)** — The "Reporting good" dropdown offers three options: **Industrials**, **Energy**, **Fertilizers**. On "Initiate Claim", the selected reporting good is written back to the movement record in local state, the movement status flips to "Claimed", and the table re-renders showing the reporting good.
-
-4. **State flow** — The `Index.tsx` page holds the movements array in `useState`. `MovementsTable` receives it as a prop. When a claim is initiated, a callback updates the movement's status to "Claimed" and sets its `reportingGood`, so the table reflects the change immediately.
-
-### Technical notes
-- No backend needed — all state is in-memory React state
-- Three mock claimed movements in seed data demonstrate all three reporting good types
-- The reporting good column uses a simple text cell (no badge needed)
-
+Quick, low-risk, scoped to one file.
