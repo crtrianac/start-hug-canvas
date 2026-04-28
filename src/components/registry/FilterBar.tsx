@@ -233,6 +233,8 @@ export function FilterBar({ filters, customers, plants, onFilterChange, onClearA
           <X className="h-3 w-3 mr-1" /> Clear all
         </Button>
       )}
+      </div>
+      <Separator />
     </div>
   );
 }
