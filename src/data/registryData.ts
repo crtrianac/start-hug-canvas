@@ -64,15 +64,15 @@ function tl(events: Omit<TimelineEvent, "movementId">[], movementId: string): Ti
 }
 
 export const initialDeliveryItems: DeliveryItem[] = [
-  // FRITO LAY — Sales doc 0901845540 (2 delivery items, France)
+  // FRITO LAY — Sales doc SO-1001 (2 delivery items, France)
   {
     id: "DI-001",
     materialName: "YaraBela Nitromag 27-0-0 (FR)",
     status: "Booked",
-    tons: 600,
-    totalEmissions: 420,
-    salesDocument: "0901845540",
-    deliveryNumber: "0697029206",
+    tons: 1200,
+    totalEmissions: 840,
+    salesDocument: "SO-1001",
+    deliveryNumber: "DL-001",
     actualGIDate: "2026-03-24",
     customer: FRITO,
     originPlant: "Brunsbüttel",
@@ -81,10 +81,10 @@ export const initialDeliveryItems: DeliveryItem[] = [
     complianceScheme: "REL",
     timeline: tl(
       [
-        { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-20 09:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 600 },
-        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-03-24 14:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — A. Müller", tons: 600 },
+        { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-20 09:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 1200 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-03-24 14:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — A. Müller", tons: 1200 },
       ],
-      "0697029206"
+      "DL-001"
     ),
   },
   {
@@ -93,8 +93,8 @@ export const initialDeliveryItems: DeliveryItem[] = [
     status: "Booked",
     tons: 400,
     totalEmissions: 280,
-    salesDocument: "0901845540",
-    deliveryNumber: "0697029223",
+    salesDocument: "SO-1001",
+    deliveryNumber: "DL-002",
     actualGIDate: "2026-03-24",
     customer: FRITO,
     originPlant: "Brunsbüttel",
@@ -106,18 +106,18 @@ export const initialDeliveryItems: DeliveryItem[] = [
         { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-20 09:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 400 },
         { label: "Certificate transferred", type: "GoodsMovement", date: "2026-03-24 14:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — A. Müller", tons: 400 },
       ],
-      "0697029223"
+      "DL-002"
     ),
   },
-  // FRITO LAY — Sales doc 0901846653 (2 delivery items, Spain)
+  // FRITO LAY — Sales doc SO-1002 (2 delivery items, Spain)
   {
     id: "DI-003",
     materialName: "YaraBela Nitromag 27-0-0 (FR)",
     status: "Booked",
     tons: 500,
     totalEmissions: 350,
-    salesDocument: "0901846653",
-    deliveryNumber: "0697030601",
+    salesDocument: "SO-1002",
+    deliveryNumber: "DL-003",
     actualGIDate: "2026-03-27",
     customer: FRITO,
     originPlant: "Brunsbüttel",
@@ -129,7 +129,7 @@ export const initialDeliveryItems: DeliveryItem[] = [
         { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-22 10:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 500 },
         { label: "Certificate transferred", type: "GoodsMovement", date: "2026-03-27 11:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — A. Müller", tons: 500 },
       ],
-      "0697030601"
+      "DL-003"
     ),
   },
   {
@@ -138,8 +138,8 @@ export const initialDeliveryItems: DeliveryItem[] = [
     status: "Booked",
     tons: 350,
     totalEmissions: 245,
-    salesDocument: "0901846653",
-    deliveryNumber: "0697030612",
+    salesDocument: "SO-1002",
+    deliveryNumber: "DL-004",
     actualGIDate: "2026-03-27",
     customer: FRITO,
     originPlant: "Brunsbüttel",
@@ -151,18 +151,18 @@ export const initialDeliveryItems: DeliveryItem[] = [
         { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-22 10:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 350 },
         { label: "Certificate transferred", type: "GoodsMovement", date: "2026-03-27 11:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — A. Müller", tons: 350 },
       ],
-      "0697030612"
+      "DL-004"
     ),
   },
-  // FRITO LAY — Sales doc 0901861584 (2 delivery items, different GI dates, UK)
+  // FRITO LAY — Sales doc SO-1003 (2 delivery items, different GI dates, UK)
   {
     id: "DI-005",
     materialName: "YaraBela Axan 27-0-0 (UK)",
     status: "Booked",
-    tons: 720,
-    totalEmissions: 504,
-    salesDocument: "0901861584",
-    deliveryNumber: "0697034438",
+    tons: 2400,
+    totalEmissions: 1680,
+    salesDocument: "SO-1003",
+    deliveryNumber: "DL-005",
     actualGIDate: "2026-03-24",
     customer: FRITO,
     originPlant: "Hull",
@@ -171,10 +171,10 @@ export const initialDeliveryItems: DeliveryItem[] = [
     complianceScheme: "REL",
     timeline: tl(
       [
-        { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-19 08:00", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 720 },
-        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-03-24 09:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — J. Smith", tons: 720 },
+        { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-19 08:00", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 2400 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-03-24 09:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — J. Smith", tons: 2400 },
       ],
-      "0697034438"
+      "DL-005"
     ),
   },
   {
@@ -183,8 +183,8 @@ export const initialDeliveryItems: DeliveryItem[] = [
     status: "Booked",
     tons: 680,
     totalEmissions: 476,
-    salesDocument: "0901861584",
-    deliveryNumber: "0697034446",
+    salesDocument: "SO-1003",
+    deliveryNumber: "DL-006",
     actualGIDate: "2026-03-26",
     customer: FRITO,
     originPlant: "Hull",
@@ -196,7 +196,7 @@ export const initialDeliveryItems: DeliveryItem[] = [
         { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-19 08:00", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 680 },
         { label: "Certificate transferred", type: "GoodsMovement", date: "2026-03-26 09:00", description: `Booked to ${FRITO}`, actor: "Sales Desk — J. Smith", tons: 680 },
       ],
-      "0697034446"
+      "DL-006"
     ),
   },
   // PepsiCo — already-claimed batch (2 items share one PDF)
@@ -206,8 +206,8 @@ export const initialDeliveryItems: DeliveryItem[] = [
     status: "Claimed",
     tons: 500,
     totalEmissions: 350,
-    salesDocument: "0901820012",
-    deliveryNumber: "0697010001",
+    salesDocument: "SO-1004",
+    deliveryNumber: "DL-007",
     actualGIDate: "2024-12-10",
     customer: PEPSI,
     originPlant: "Brunsbüttel",
@@ -223,7 +223,7 @@ export const initialDeliveryItems: DeliveryItem[] = [
         { label: "Certificate transferred", type: "GoodsMovement", date: "2024-12-05 10:00", description: `Booked to ${PEPSI}`, actor: "Sales Desk — A. Müller", tons: 500 },
         { label: "Certificate retired (claimed)", type: "Claim", date: "2024-12-10 11:00", description: "Batch claim CLAIM-2024-001 — Fertilizers (2 delivery items, shared PDF)", actor: "PepsiCo Sustainability Team", documentUrl: "/docs/CLAIM-2024-001.pdf", tons: 500 },
       ],
-      "0697010001"
+      "DL-007"
     ),
   },
   {
@@ -232,8 +232,8 @@ export const initialDeliveryItems: DeliveryItem[] = [
     status: "Claimed",
     tons: 300,
     totalEmissions: 210,
-    salesDocument: "0901820012",
-    deliveryNumber: "0697010002",
+    salesDocument: "SO-1004",
+    deliveryNumber: "DL-008",
     actualGIDate: "2024-12-10",
     customer: PEPSI,
     originPlant: "Brunsbüttel",
@@ -249,7 +249,7 @@ export const initialDeliveryItems: DeliveryItem[] = [
         { label: "Certificate transferred", type: "GoodsMovement", date: "2024-12-05 10:00", description: `Booked to ${PEPSI}`, actor: "Sales Desk — A. Müller", tons: 300 },
         { label: "Certificate retired (claimed)", type: "Claim", date: "2024-12-10 11:00", description: "Batch claim CLAIM-2024-001 — Fertilizers (2 delivery items, shared PDF)", actor: "PepsiCo Sustainability Team", documentUrl: "/docs/CLAIM-2024-001.pdf", tons: 300 },
       ],
-      "0697010002"
+      "DL-008"
     ),
   },
   // Nestlé UK — Booked
@@ -257,10 +257,10 @@ export const initialDeliveryItems: DeliveryItem[] = [
     id: "DI-009",
     materialName: "YaraBela Axan 27-0-0 (UK)",
     status: "Booked",
-    tons: 1500,
-    totalEmissions: 1050,
-    salesDocument: "0901830045",
-    deliveryNumber: "0697020001",
+    tons: 3200,
+    totalEmissions: 2240,
+    salesDocument: "SO-1005",
+    deliveryNumber: "DL-009",
     actualGIDate: "2024-11-28",
     customer: NESTLE,
     originPlant: "Hull",
@@ -269,10 +269,10 @@ export const initialDeliveryItems: DeliveryItem[] = [
     complianceScheme: "REL",
     timeline: tl(
       [
-        { label: "Certificate issued", type: "GoodsMovement", date: "2024-11-20 08:45", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 1500 },
-        { label: "Certificate transferred", type: "GoodsMovement", date: "2024-11-28 16:30", description: `Booked to ${NESTLE}`, actor: "Sales Desk — J. Smith", tons: 1500 },
+        { label: "Certificate issued", type: "GoodsMovement", date: "2024-11-20 08:45", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 3200 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "2024-11-28 16:30", description: `Booked to ${NESTLE}`, actor: "Sales Desk — J. Smith", tons: 3200 },
       ],
-      "0697020001"
+      "DL-009"
     ),
   },
   // BASF — Issued (no customer yet)
@@ -280,10 +280,10 @@ export const initialDeliveryItems: DeliveryItem[] = [
     id: "DI-010",
     materialName: "YaraBela Axan 27-0-0 (UK)",
     status: "Issued",
-    tons: 2000,
-    totalEmissions: 1400,
-    salesDocument: "0901810099",
-    deliveryNumber: "0697000123",
+    tons: 5000,
+    totalEmissions: 3500,
+    salesDocument: "SO-1006",
+    deliveryNumber: "DL-010",
     actualGIDate: "2024-11-20",
     customer: BASF,
     originPlant: "Hull",
@@ -291,8 +291,8 @@ export const initialDeliveryItems: DeliveryItem[] = [
     deliveryAddress: "BASF SE, Carl-Bosch-Straße 38, 67056 Ludwigshafen am Rhein, Germany",
     complianceScheme: "REL",
     timeline: tl(
-      [{ label: "Certificate issued", type: "GoodsMovement", date: "2024-11-20 08:45", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 2000 }],
-      "0697000123"
+      [{ label: "Certificate issued", type: "GoodsMovement", date: "2024-11-20 08:45", description: "Issued at Hull", actor: "Plant Operator (Hull)", tons: 5000 }],
+      "DL-010"
     ),
   },
   // Cargill — Booked
@@ -302,8 +302,8 @@ export const initialDeliveryItems: DeliveryItem[] = [
     status: "Booked",
     tons: 350,
     totalEmissions: 245,
-    salesDocument: "0901850077",
-    deliveryNumber: "0697040001",
+    salesDocument: "SO-1007",
+    deliveryNumber: "DL-011",
     actualGIDate: "2024-12-18",
     customer: CARGILL,
     originPlant: "Brunsbüttel",
@@ -315,7 +315,7 @@ export const initialDeliveryItems: DeliveryItem[] = [
         { label: "Certificate issued", type: "GoodsMovement", date: "2024-12-15 10:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 350 },
         { label: "Certificate transferred", type: "GoodsMovement", date: "2024-12-18 15:45", description: `Booked to ${CARGILL}`, actor: "Sales Desk — A. Müller", tons: 350 },
       ],
-      "0697040001"
+      "DL-011"
     ),
   },
 ];
