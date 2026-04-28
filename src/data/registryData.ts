@@ -54,8 +54,11 @@ export interface CarbonDatabaseEntry {
 }
 
 const PEPSI = "PepsiCo Europe";
+const PEPSI_BEV = "PepsiCo Beverages Iberia";
 const FRITO = "FRITO LAY TRADING COMPANY (EUROPE)";
+const FRITO_NL = "Frito Lay Netherlands B.V.";
 const NESTLE = "Nestlé UK";
+const NESTLE_FR = "Nestlé France SAS";
 const BASF = "BASF SE";
 const CARGILL = "Cargill Germany";
 
