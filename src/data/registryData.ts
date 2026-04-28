@@ -54,8 +54,11 @@ export interface CarbonDatabaseEntry {
 }
 
 const PEPSI = "PepsiCo Europe";
+const PEPSI_BEV = "PepsiCo Beverages Iberia";
 const FRITO = "FRITO LAY TRADING COMPANY (EUROPE)";
+const FRITO_NL = "Frito Lay Netherlands B.V.";
 const NESTLE = "Nestlé UK";
+const NESTLE_FR = "Nestlé France SAS";
 const BASF = "BASF SE";
 const CARGILL = "Cargill Germany";
 
@@ -316,6 +319,141 @@ export const initialDeliveryItems: DeliveryItem[] = [
         { label: "Certificate transferred", type: "GoodsMovement", date: "2024-12-18 15:45", description: `Booked to ${CARGILL}`, actor: "Sales Desk — A. Müller", tons: 350 },
       ],
       "DL-011"
+    ),
+  },
+  // Frito Lay Netherlands — sister trading entity (Booked, NL)
+  {
+    id: "DI-012",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Booked",
+    tons: 900,
+    totalEmissions: 630,
+    salesDocument: "SO-1008",
+    deliveryNumber: "DL-012",
+    actualGIDate: "2026-04-02",
+    customer: FRITO_NL,
+    originPlant: "Brunsbüttel",
+    country: "Netherlands",
+    deliveryAddress: "Frito Lay Netherlands B.V., Zoete Inval 20, 4815 HK Breda, Netherlands",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-29 09:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 900 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-04-02 11:00", description: `Booked to ${FRITO_NL}`, actor: "Sales Desk — A. Müller", tons: 900 },
+      ],
+      "DL-012"
+    ),
+  },
+  {
+    id: "DI-013",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Booked",
+    tons: 1100,
+    totalEmissions: 770,
+    salesDocument: "SO-1008",
+    deliveryNumber: "DL-013",
+    actualGIDate: "2026-04-03",
+    customer: FRITO_NL,
+    originPlant: "Brunsbüttel",
+    country: "Netherlands",
+    deliveryAddress: "Frito Lay Netherlands B.V., Zoete Inval 20, 4815 HK Breda, Netherlands",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-29 09:00", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 1100 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-04-03 11:00", description: `Booked to ${FRITO_NL}`, actor: "Sales Desk — A. Müller", tons: 1100 },
+      ],
+      "DL-013"
+    ),
+  },
+  // PepsiCo Beverages Iberia — sister trading entity (Booked, Spain)
+  {
+    id: "DI-014",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Booked",
+    tons: 1800,
+    totalEmissions: 1260,
+    salesDocument: "SO-1009",
+    deliveryNumber: "DL-014",
+    actualGIDate: "2026-04-05",
+    customer: PEPSI_BEV,
+    originPlant: "Brunsbüttel",
+    country: "Spain",
+    deliveryAddress: "PepsiCo Beverages Iberia, Av. de los Andes 41, 28042 Madrid, Spain",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-30 08:30", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 1800 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-04-05 14:00", description: `Booked to ${PEPSI_BEV}`, actor: "Sales Desk — A. Müller", tons: 1800 },
+      ],
+      "DL-014"
+    ),
+  },
+  {
+    id: "DI-015",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Booked",
+    tons: 700,
+    totalEmissions: 490,
+    salesDocument: "SO-1009",
+    deliveryNumber: "DL-015",
+    actualGIDate: "2026-04-06",
+    customer: PEPSI_BEV,
+    originPlant: "Brunsbüttel",
+    country: "Spain",
+    deliveryAddress: "PepsiCo Beverages Iberia, Av. de los Andes 41, 28042 Madrid, Spain",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "2026-03-30 08:30", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 700 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-04-06 14:00", description: `Booked to ${PEPSI_BEV}`, actor: "Sales Desk — A. Müller", tons: 700 },
+      ],
+      "DL-015"
+    ),
+  },
+  // Nestlé France — sister entity of Nestlé UK (Booked, France)
+  {
+    id: "DI-016",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Booked",
+    tons: 2100,
+    totalEmissions: 1470,
+    salesDocument: "SO-1010",
+    deliveryNumber: "DL-016",
+    actualGIDate: "2026-04-08",
+    customer: NESTLE_FR,
+    originPlant: "Brunsbüttel",
+    country: "France",
+    deliveryAddress: "Nestlé France SAS, 34-40 Rue Guynemer, 92130 Issy-les-Moulineaux, France",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "2026-04-01 09:15", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 2100 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-04-08 10:30", description: `Booked to ${NESTLE_FR}`, actor: "Sales Desk — A. Müller", tons: 2100 },
+      ],
+      "DL-016"
+    ),
+  },
+  {
+    id: "DI-017",
+    materialName: "YaraBela Nitromag 27-0-0 (FR)",
+    status: "Booked",
+    tons: 950,
+    totalEmissions: 665,
+    salesDocument: "SO-1010",
+    deliveryNumber: "DL-017",
+    actualGIDate: "2026-04-09",
+    customer: NESTLE_FR,
+    originPlant: "Brunsbüttel",
+    country: "France",
+    deliveryAddress: "Nestlé France SAS, 34-40 Rue Guynemer, 92130 Issy-les-Moulineaux, France",
+    complianceScheme: "REL",
+    timeline: tl(
+      [
+        { label: "Certificate issued", type: "GoodsMovement", date: "2026-04-01 09:15", description: "Issued at Brunsbüttel", actor: "Plant Operator (Brunsbüttel)", tons: 950 },
+        { label: "Certificate transferred", type: "GoodsMovement", date: "2026-04-09 10:30", description: `Booked to ${NESTLE_FR}`, actor: "Sales Desk — A. Müller", tons: 950 },
+      ],
+      "DL-017"
     ),
   },
 ];
