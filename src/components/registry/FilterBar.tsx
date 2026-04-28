@@ -146,7 +146,8 @@ export function FilterBar({ filters, customers, plants, onFilterChange, onClearA
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-4">
+    <div className="mb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-3">
       <MultiSelect
         label="Customer / Plant"
         width="w-[260px]"
@@ -232,6 +233,8 @@ export function FilterBar({ filters, customers, plants, onFilterChange, onClearA
           <X className="h-3 w-3 mr-1" /> Clear all
         </Button>
       )}
+      </div>
+      <Separator />
     </div>
   );
 }
