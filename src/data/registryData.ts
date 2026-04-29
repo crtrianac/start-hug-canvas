@@ -10,6 +10,9 @@ export interface TimelineEvent {
   actor?: string;
   documentUrl?: string;
   tons?: number;
+  /** For "Claim sent to customer" events */
+  recipient?: string;
+  comments?: string;
 }
 
 export interface DeliveryItem {
