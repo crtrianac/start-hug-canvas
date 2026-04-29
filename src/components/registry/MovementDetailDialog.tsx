@@ -2,10 +2,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { DeliveryItem, getProductPCF } from "@/data/registryData";
 import { Separator } from "@/components/ui/separator";
-import { Send } from "lucide-react";
 
 interface Props {
   item: DeliveryItem | null;
