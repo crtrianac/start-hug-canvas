@@ -7,8 +7,9 @@ import { FilterBar, type Filters } from "@/components/registry/FilterBar";
 import { MovementsTable } from "@/components/registry/MovementsTable";
 import { MovementDetailDialog } from "@/components/registry/MovementDetailDialog";
 import { CreateClaimDialog } from "@/components/registry/CreateClaimDialog";
+import { SendClaimDialog } from "@/components/registry/SendClaimDialog";
 import { CarbonDatabaseTab } from "@/components/registry/CarbonDatabaseTab";
-import { initialDeliveryItems, DeliveryItem, ReportingGood } from "@/data/registryData";
+import { initialDeliveryItems, DeliveryItem, ReportingGood, TimelineEvent } from "@/data/registryData";
 import { toast } from "@/hooks/use-toast";
 import { applyBatchClaim } from "@/lib/batchClaim";
 
