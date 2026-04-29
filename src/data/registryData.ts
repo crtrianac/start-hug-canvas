@@ -491,3 +491,30 @@ export const carbonDatabaseEntries: CarbonDatabaseEntry[] = [
     region: "United Kingdom",
   },
 ];
+
+/** PCF + nitrogen content lookup for the two finished products (mock values). */
+export interface ProductPCF {
+  pcfPerProduct: number; // tCO2e / t product
+  pcfPerN: number;       // tCO2e / tN
+  nPerProduct: number;   // tN / t product
+}
+
+export const productPCFLookup: Record<string, ProductPCF> = {
+  "YaraBela Nitromag 27-0-0 (FR)": {
+    pcfPerProduct: 2.1,
+    pcfPerN: 7.78,
+    nPerProduct: 0.27,
+  },
+  "YaraBela Axan 27-0-0 (UK)": {
+    pcfPerProduct: 2.3,
+    pcfPerN: 8.52,
+    nPerProduct: 0.27,
+  },
+};
+
+export function getProductPCF(item: Pick<DeliveryItem, "materialName" | "pcfPerProduct" | "pcfPerN" | "nPerProduct">): ProductPCF | undefined {
+  if (item.pcfPerProduct !== undefined && item.pcfPerN !== undefined && item.nPerProduct !== undefined) {
+    return { pcfPerProduct: item.pcfPerProduct, pcfPerN: item.pcfPerN, nPerProduct: item.nPerProduct };
+  }
+  return productPCFLookup[item.materialName];
+}
