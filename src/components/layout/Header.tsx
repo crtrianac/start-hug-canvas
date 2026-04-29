@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { FeedbackDialog } from "./FeedbackDialog";
 
 export function Header() {
   return (
@@ -10,6 +11,7 @@ export function Header() {
         <span className="text-xs text-muted-foreground">
           Last update: Dec 20, 2024 — 11:30 UTC
         </span>
+        <FeedbackDialog />
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-primary text-primary-foreground text-xs">YA</AvatarFallback>
