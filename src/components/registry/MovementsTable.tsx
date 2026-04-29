@@ -1,4 +1,4 @@
-import { Award, FileDown, Eye, ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
+import { Award, FileDown, Eye, ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Send } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ interface Props {
   onExportCSV: () => void;
   filteredClaimableIds: string[];
   onClaimAllFiltered: () => void;
+  onSendClaim?: (item: DeliveryItem) => void;
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -114,6 +115,7 @@ export function MovementsTable({
   onExportCSV,
   filteredClaimableIds,
   onClaimAllFiltered,
+  onSendClaim,
 }: Props) {
   const groups = useMemo(() => buildGroups(items), [items]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -266,16 +268,23 @@ export function MovementsTable({
                     <TableCell className="text-xs font-mono text-muted-foreground">{g.claimBatchId ?? "—"}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        {g.status === "Claimed" && g.items[0].claimDocumentUrl && (
-                          <a
-                            href={g.items[0].claimDocumentUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-muted-foreground inline-flex items-center px-2 h-7 hover:text-foreground"
-                          >
-                            <FileDown className="h-3 w-3 mr-1" /> Shared PDF
-                          </a>
-                        )}
+                        {g.status === "Claimed" && onSendClaim && (() => {
+                          const target = g.items[0];
+                          const alreadySent = g.items.some((i) =>
+                            i.timeline.some((e) => e.type === "ClaimSent")
+                          );
+                          return (
+                            <Button
+                              variant={alreadySent ? "outline" : "default"}
+                              size="sm"
+                              className="text-xs h-7 px-2 gap-1"
+                              onClick={() => onSendClaim(target)}
+                            >
+                              <Send className="h-3 w-3" />
+                              {alreadySent ? "Send again" : "Send claim"}
+                            </Button>
+                          );
+                        })()}
                       </div>
                     </TableCell>
                   </TableRow>

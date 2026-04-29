@@ -7,28 +7,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { FileText, Send } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FileText, Send, Mail } from "lucide-react";
 import { DeliveryItem } from "@/data/registryData";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   item: DeliveryItem | null;
-  onSend: (args: { recipientEmail: string; recipientName: string; comments: string }) => void;
+  onSend: (args: { ccEmails: string[]; comments: string }) => void;
 }
 
-const DEFAULT_SENDER = "current.user@yara.com";
+const SYSTEM_SENDER = "claims-noreply@yara.com";
+const CUSTOMER_SYSTEM_EMAIL = "sustainability-claims@customer-system.com";
+const CURRENT_USER_EMAIL = "current.user@yara.com";
 
 export function SendClaimDialog({ open, onOpenChange, item, onSend }: Props) {
-  const [recipientName, setRecipientName] = useState("");
-  const [recipientEmail, setRecipientEmail] = useState("");
+  const [ccSelf, setCcSelf] = useState(false);
+  const [extraCc, setExtraCc] = useState("");
   const [comments, setComments] = useState("");
   const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (open && item) {
-      setRecipientName(item.onBehalfOf ?? item.customer);
-      setRecipientEmail("");
+      setCcSelf(false);
+      setExtraCc("");
       setComments("");
       setShowPreview(false);
     }
@@ -36,11 +39,19 @@ export function SendClaimDialog({ open, onOpenChange, item, onSend }: Props) {
 
   if (!item) return null;
 
-  const canSend = recipientName.trim() !== "" && recipientEmail.trim() !== "";
+  const alreadySent = item.timeline.some((e) => e.type === "ClaimSent");
 
   const handleSend = () => {
-    if (!canSend) return;
-    onSend({ recipientEmail: recipientEmail.trim(), recipientName: recipientName.trim(), comments: comments.trim() });
+    const cc: string[] = [];
+    if (ccSelf) cc.push(CURRENT_USER_EMAIL);
+    extraCc
+      .split(/[,;\s]+/)
+      .map((e) => e.trim())
+      .filter((e) => e.length > 0 && /\S+@\S+\.\S+/.test(e))
+      .forEach((e) => {
+        if (!cc.includes(e)) cc.push(e);
+      });
+    onSend({ ccEmails: cc, comments: comments.trim() });
     onOpenChange(false);
   };
 
@@ -49,10 +60,10 @@ export function SendClaimDialog({ open, onOpenChange, item, onSend }: Props) {
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-base flex items-center gap-2">
-            <Send className="h-4 w-4" /> Send claim to customer
+            <Send className="h-4 w-4" /> {alreadySent ? "Send claim again" : "Send claim to customer"}
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Preview the claim and send the certificate PDF directly to the customer. The action will be recorded on the timeline.
+            The claim certificate will be sent to the customer's system inbox. The action is recorded on the timeline.
           </DialogDescription>
         </DialogHeader>
         <Separator />
@@ -61,6 +72,10 @@ export function SendClaimDialog({ open, onOpenChange, item, onSend }: Props) {
           <div className="flex justify-between">
             <span className="text-muted-foreground">Batch claim ID:</span>
             <span className="font-mono font-semibold">{item.claimBatchId ?? "—"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Customer:</span>
+            <span className="font-semibold text-right max-w-[60%] truncate">{item.customer}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Material:</span>
@@ -76,10 +91,6 @@ export function SendClaimDialog({ open, onOpenChange, item, onSend }: Props) {
               <span className="font-semibold">{item.totalEmissions.toLocaleString()} tCO₂e</span>
             </div>
           )}
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Reporting good:</span>
-            <span className="font-semibold">{item.reportingGood ?? "—"}</span>
-          </div>
         </div>
 
         {item.claimDocumentUrl && (
@@ -114,25 +125,42 @@ export function SendClaimDialog({ open, onOpenChange, item, onSend }: Props) {
         <Separator />
 
         <div className="space-y-3">
+          <div className="rounded-md border border-border bg-muted/20 p-3 text-xs space-y-1">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Mail className="h-3 w-3" /> System email — recipient is fixed
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">From:</span>
+              <span className="font-mono">{SYSTEM_SENDER}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">To:</span>
+              <span className="font-mono">{CUSTOMER_SYSTEM_EMAIL}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="cc-self"
+              checked={ccSelf}
+              onCheckedChange={(v) => setCcSelf(v === true)}
+            />
+            <Label htmlFor="cc-self" className="text-xs cursor-pointer">
+              CC me (<span className="font-mono">{CURRENT_USER_EMAIL}</span>)
+            </Label>
+          </div>
+
           <div>
-            <Label className="text-xs text-muted-foreground">Recipient name / company</Label>
+            <Label className="text-xs text-muted-foreground">Additional CC (optional)</Label>
             <Input
               className="mt-1"
-              value={recipientName}
-              onChange={(e) => setRecipientName(e.target.value)}
-              placeholder="e.g. PepsiCo Sustainability Team"
+              value={extraCc}
+              onChange={(e) => setExtraCc(e.target.value)}
+              placeholder="colleague@yara.com, manager@yara.com"
             />
+            <p className="text-[10px] text-muted-foreground mt-1">Separate multiple emails with commas.</p>
           </div>
-          <div>
-            <Label className="text-xs text-muted-foreground">Recipient email</Label>
-            <Input
-              className="mt-1"
-              type="email"
-              value={recipientEmail}
-              onChange={(e) => setRecipientEmail(e.target.value)}
-              placeholder="sustainability@customer.com"
-            />
-          </div>
+
           <div>
             <Label className="text-xs text-muted-foreground">Comments (optional)</Label>
             <Textarea
@@ -143,15 +171,12 @@ export function SendClaimDialog({ open, onOpenChange, item, onSend }: Props) {
               rows={3}
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            From: <span className="font-mono">{DEFAULT_SENDER}</span>
-          </p>
         </div>
 
         <DialogFooter className="mt-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSend} disabled={!canSend} className="gap-2">
-            <Send className="h-4 w-4" /> Send claim
+          <Button onClick={handleSend} className="gap-2">
+            <Send className="h-4 w-4" /> {alreadySent ? "Send again" : "Send claim"}
           </Button>
         </DialogFooter>
       </DialogContent>

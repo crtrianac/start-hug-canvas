@@ -2,10 +2,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { DeliveryItem, getProductPCF } from "@/data/registryData";
 import { Separator } from "@/components/ui/separator";
-import { Send } from "lucide-react";
 
 interface Props {
   item: DeliveryItem | null;
@@ -131,19 +129,6 @@ export function MovementDetailDialog({ item, open, onOpenChange, onSendClaim }: 
             />
           )}
         </div>
-
-        {item.status === "Claimed" && onSendClaim && (
-          <>
-            <Separator />
-            <Button
-              onClick={() => onSendClaim(item)}
-              size="sm"
-              className="gap-2 w-full"
-            >
-              <Send className="h-4 w-4" /> Send claim to customer
-            </Button>
-          </>
-        )}
 
         <Separator />
         <p className="text-sm font-semibold text-foreground">Timeline</p>
