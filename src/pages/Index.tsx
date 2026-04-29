@@ -239,7 +239,18 @@ export default function Index() {
         </TabsContent>
       </Tabs>
 
-      <MovementDetailDialog item={detailItem} open={detailOpen} onOpenChange={setDetailOpen} />
+      <MovementDetailDialog
+        item={detailItem}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onSendClaim={handleOpenSendClaim}
+      />
+      <SendClaimDialog
+        open={sendClaimOpen}
+        onOpenChange={setSendClaimOpen}
+        item={sendClaimItem}
+        onSend={handleConfirmSendClaim}
+      />
       <CreateClaimDialog
         open={claimOpen}
         onOpenChange={setClaimOpen}
