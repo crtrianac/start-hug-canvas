@@ -6,7 +6,11 @@ const FEEDBACK_URL =
 
 export function FeedbackDialog() {
   return (
-    <Button asChild variant="outline" size="sm" className="gap-2">
+    <Button
+      asChild
+      size="sm"
+      className="gap-2 bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+    >
       <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">
         <MessageSquarePlus className="h-4 w-4" />
         Feedback
