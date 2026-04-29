@@ -115,6 +115,7 @@ export function MovementsTable({
   onExportCSV,
   filteredClaimableIds,
   onClaimAllFiltered,
+  onSendClaim,
 }: Props) {
   const groups = useMemo(() => buildGroups(items), [items]);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
