@@ -17,6 +17,7 @@ interface Props {
   onExportCSV: () => void;
   filteredClaimableIds: string[];
   onClaimAllFiltered: () => void;
+  onSendClaim?: (item: DeliveryItem) => void;
 }
 
 function StatusBadge({ status }: { status: string }) {
