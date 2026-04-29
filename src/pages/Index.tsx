@@ -7,8 +7,9 @@ import { FilterBar, type Filters } from "@/components/registry/FilterBar";
 import { MovementsTable } from "@/components/registry/MovementsTable";
 import { MovementDetailDialog } from "@/components/registry/MovementDetailDialog";
 import { CreateClaimDialog } from "@/components/registry/CreateClaimDialog";
+import { SendClaimDialog } from "@/components/registry/SendClaimDialog";
 import { CarbonDatabaseTab } from "@/components/registry/CarbonDatabaseTab";
-import { initialDeliveryItems, DeliveryItem, ReportingGood } from "@/data/registryData";
+import { initialDeliveryItems, DeliveryItem, ReportingGood, TimelineEvent } from "@/data/registryData";
 import { toast } from "@/hooks/use-toast";
 import { applyBatchClaim } from "@/lib/batchClaim";
 
@@ -26,7 +27,70 @@ export default function Index() {
   const [detailItem, setDetailItem] = useState<DeliveryItem | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
+  const [sendClaimItem, setSendClaimItem] = useState<DeliveryItem | null>(null);
+  const [sendClaimOpen, setSendClaimOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const handleOpenSendClaim = useCallback((item: DeliveryItem) => {
+    setSendClaimItem(item);
+    setSendClaimOpen(true);
+  }, []);
+
+  const handleConfirmSendClaim = useCallback(
+    ({ recipientEmail, recipientName, comments }: { recipientEmail: string; recipientName: string; comments: string }) => {
+      if (!sendClaimItem) return;
+      const target = sendClaimItem;
+      const sender = "current.user@yara.com";
+      const now = new Date();
+      const dateStr = now.toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" });
+
+      // Append the event to every delivery item that shares the same batch claim
+      setItems((prev) =>
+        prev.map((it) => {
+          const sameBatch = target.claimBatchId && it.claimBatchId === target.claimBatchId;
+          const sameItem = it.id === target.id;
+          if (!sameBatch && !sameItem) return it;
+          const event: TimelineEvent = {
+            label: "Claim sent to customer",
+            movementId: it.deliveryNumber,
+            type: "ClaimSent",
+            date: dateStr,
+            description: `Claim ${target.claimBatchId ?? ""} sent to customer`.trim(),
+            actor: sender,
+            recipient: `${recipientName} <${recipientEmail}>`,
+            comments: comments || undefined,
+            documentUrl: it.claimDocumentUrl,
+          };
+          return { ...it, timeline: [...it.timeline, event] };
+        })
+      );
+
+      // Keep dialog state in sync so detail view reflects the new event
+      setDetailItem((curr) => {
+        if (!curr) return curr;
+        const sameBatch = target.claimBatchId && curr.claimBatchId === target.claimBatchId;
+        if (!sameBatch && curr.id !== target.id) return curr;
+        const event: TimelineEvent = {
+          label: "Claim sent to customer",
+          movementId: curr.deliveryNumber,
+          type: "ClaimSent",
+          date: dateStr,
+          description: `Claim ${target.claimBatchId ?? ""} sent to customer`.trim(),
+          actor: sender,
+          recipient: `${recipientName} <${recipientEmail}>`,
+          comments: comments || undefined,
+          documentUrl: curr.claimDocumentUrl,
+        };
+        return { ...curr, timeline: [...curr.timeline, event] };
+      });
+
+      toast({
+        title: "Claim sent",
+        description: `Claim ${target.claimBatchId ?? ""} sent to ${recipientName} (${recipientEmail}).`,
+      });
+    },
+    [sendClaimItem]
+  );
   
 
   const handleFilterChange = useCallback(
@@ -175,7 +239,18 @@ export default function Index() {
         </TabsContent>
       </Tabs>
 
-      <MovementDetailDialog item={detailItem} open={detailOpen} onOpenChange={setDetailOpen} />
+      <MovementDetailDialog
+        item={detailItem}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onSendClaim={handleOpenSendClaim}
+      />
+      <SendClaimDialog
+        open={sendClaimOpen}
+        onOpenChange={setSendClaimOpen}
+        item={sendClaimItem}
+        onSend={handleConfirmSendClaim}
+      />
       <CreateClaimDialog
         open={claimOpen}
         onOpenChange={setClaimOpen}

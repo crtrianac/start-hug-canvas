@@ -2,13 +2,16 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { DeliveryItem } from "@/data/registryData";
+import { Button } from "@/components/ui/button";
+import { DeliveryItem, getProductPCF } from "@/data/registryData";
 import { Separator } from "@/components/ui/separator";
+import { Send } from "lucide-react";
 
 interface Props {
   item: DeliveryItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSendClaim?: (item: DeliveryItem) => void;
 }
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -24,10 +27,10 @@ const dotColor: Record<string, string> = {
   "Certificate issued": "border-muted-foreground",
   "Certificate transferred": "border-status-booked",
   "Certificate retired (claimed)": "border-status-claimed",
+  "Claim sent to customer": "border-primary",
 };
 
 function formatDate(iso: string) {
-  // Accepts "yyyy-mm-dd" or "yyyy-mm-dd HH:MM"
   const d = new Date(iso.replace(" ", "T"));
   if (isNaN(d.getTime())) return iso;
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -51,6 +54,10 @@ function Timeline({ events }: { events: DeliveryItem["timeline"] }) {
               <p className="text-xs font-medium text-foreground">Amount: {evt.tons.toLocaleString()} t</p>
             )}
             {evt.actor && <p className="text-xs text-muted-foreground">By: {evt.actor}</p>}
+            {evt.recipient && <p className="text-xs text-muted-foreground">To: {evt.recipient}</p>}
+            {evt.comments && (
+              <p className="text-xs text-muted-foreground italic mt-0.5">"{evt.comments}"</p>
+            )}
             {evt.documentUrl && (
               <a
                 href={evt.documentUrl}
@@ -68,8 +75,10 @@ function Timeline({ events }: { events: DeliveryItem["timeline"] }) {
   );
 }
 
-export function MovementDetailDialog({ item, open, onOpenChange }: Props) {
+export function MovementDetailDialog({ item, open, onOpenChange, onSendClaim }: Props) {
   if (!item) return null;
+
+  const pcf = getProductPCF(item);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -88,6 +97,15 @@ export function MovementDetailDialog({ item, open, onOpenChange }: Props) {
           <Row label="Tons" value={`${item.tons.toLocaleString()} t`} />
           {item.totalEmissions !== undefined && (
             <Row label="Emissions" value={`${item.totalEmissions.toLocaleString()} tCO₂e`} />
+          )}
+          {pcf && (
+            <>
+              <Separator className="my-1" />
+              <Row label="PCF (per product)" value={`${pcf.pcfPerProduct.toFixed(2)} tCO₂e / t product`} />
+              <Row label="PCF (per N)" value={`${pcf.pcfPerN.toFixed(2)} tCO₂e / tN`} />
+              <Row label="N content" value={`${pcf.nPerProduct.toFixed(2)} tN / t product`} />
+              <Separator className="my-1" />
+            </>
           )}
           <Row label="Customer / Climate Partner" value={item.customer} />
           <Row label="Delivery Country" value={item.country} />
@@ -113,6 +131,20 @@ export function MovementDetailDialog({ item, open, onOpenChange }: Props) {
             />
           )}
         </div>
+
+        {item.status === "Claimed" && onSendClaim && (
+          <>
+            <Separator />
+            <Button
+              onClick={() => onSendClaim(item)}
+              size="sm"
+              className="gap-2 w-full"
+            >
+              <Send className="h-4 w-4" /> Send claim to customer
+            </Button>
+          </>
+        )}
+
         <Separator />
         <p className="text-sm font-semibold text-foreground">Timeline</p>
         <Timeline events={item.timeline} />
