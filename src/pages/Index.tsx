@@ -231,6 +231,7 @@ export default function Index() {
             onExportCSV={handleExportCSV}
             filteredClaimableIds={filteredClaimableIds}
             onClaimAllFiltered={openClaimConfirm}
+            onSendClaim={handleOpenSendClaim}
           />
         </TabsContent>
 
