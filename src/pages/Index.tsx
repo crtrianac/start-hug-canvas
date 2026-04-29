@@ -37,12 +37,28 @@ export default function Index() {
   }, []);
 
   const handleConfirmSendClaim = useCallback(
-    ({ recipientEmail, recipientName, comments }: { recipientEmail: string; recipientName: string; comments: string }) => {
+    ({ ccEmails, comments }: { ccEmails: string[]; comments: string }) => {
       if (!sendClaimItem) return;
       const target = sendClaimItem;
       const sender = "current.user@yara.com";
+      const customerSystemEmail = "sustainability-claims@customer-system.com";
       const now = new Date();
       const dateStr = now.toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" });
+      const recipientStr = ccEmails.length > 0
+        ? `${customerSystemEmail} (cc: ${ccEmails.join(", ")})`
+        : customerSystemEmail;
+
+      const buildEvent = (it: DeliveryItem): TimelineEvent => ({
+        label: "Claim sent to customer",
+        movementId: it.deliveryNumber,
+        type: "ClaimSent",
+        date: dateStr,
+        description: `Claim ${target.claimBatchId ?? ""} sent to customer`.trim(),
+        actor: sender,
+        recipient: recipientStr,
+        comments: comments || undefined,
+        documentUrl: it.claimDocumentUrl,
+      });
 
       // Append the event to every delivery item that shares the same batch claim
       setItems((prev) =>
@@ -50,18 +66,7 @@ export default function Index() {
           const sameBatch = target.claimBatchId && it.claimBatchId === target.claimBatchId;
           const sameItem = it.id === target.id;
           if (!sameBatch && !sameItem) return it;
-          const event: TimelineEvent = {
-            label: "Claim sent to customer",
-            movementId: it.deliveryNumber,
-            type: "ClaimSent",
-            date: dateStr,
-            description: `Claim ${target.claimBatchId ?? ""} sent to customer`.trim(),
-            actor: sender,
-            recipient: `${recipientName} <${recipientEmail}>`,
-            comments: comments || undefined,
-            documentUrl: it.claimDocumentUrl,
-          };
-          return { ...it, timeline: [...it.timeline, event] };
+          return { ...it, timeline: [...it.timeline, buildEvent(it)] };
         })
       );
 
@@ -70,23 +75,12 @@ export default function Index() {
         if (!curr) return curr;
         const sameBatch = target.claimBatchId && curr.claimBatchId === target.claimBatchId;
         if (!sameBatch && curr.id !== target.id) return curr;
-        const event: TimelineEvent = {
-          label: "Claim sent to customer",
-          movementId: curr.deliveryNumber,
-          type: "ClaimSent",
-          date: dateStr,
-          description: `Claim ${target.claimBatchId ?? ""} sent to customer`.trim(),
-          actor: sender,
-          recipient: `${recipientName} <${recipientEmail}>`,
-          comments: comments || undefined,
-          documentUrl: curr.claimDocumentUrl,
-        };
-        return { ...curr, timeline: [...curr.timeline, event] };
+        return { ...curr, timeline: [...curr.timeline, buildEvent(curr)] };
       });
 
       toast({
         title: "Claim sent",
-        description: `Claim ${target.claimBatchId ?? ""} sent to ${recipientName} (${recipientEmail}).`,
+        description: `Claim ${target.claimBatchId ?? ""} sent to customer system inbox${ccEmails.length ? ` (cc: ${ccEmails.join(", ")})` : ""}.`,
       });
     },
     [sendClaimItem]
