@@ -18,6 +18,12 @@ export interface DeliveryItem {
   status: DeliveryStatus;
   tons: number;
   totalEmissions?: number;
+  /** PCF expressed per ton of finished product (tCO2e / t product) */
+  pcfPerProduct?: number;
+  /** PCF expressed per ton of nitrogen (tCO2e / tN) */
+  pcfPerN?: number;
+  /** Nitrogen content of the product (tN per t product) — e.g. 0.27 for a 27% N grade */
+  nPerProduct?: number;
   /** Sales document number — multiple delivery items can share one */
   salesDocument: string;
   /** Unique delivery item number */
